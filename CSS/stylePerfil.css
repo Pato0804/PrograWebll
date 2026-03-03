@@ -1,0 +1,92 @@
+body {
+    background-color: #F0F2F5;
+    margin: 0;
+    padding-top: 60px;
+    font-family: Arial, sans-serif;
+}
+
+.perfil-layout {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.perfil-header {
+    background: white;
+    border-radius: 0 0 15px 15px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    overflow: hidden;
+    margin-bottom: 20px;
+}
+
+.portada {
+    height: 200px;
+    /* Un degradado que combine con tu temática */
+    background: linear-gradient(to right, #1B365D, #2D5A27);
+}
+
+.info-principal {
+    display: flex;
+    padding: 0 30px 20px 30px;
+    align-items: flex-end;
+    margin-top: -60px; /* Sube la foto sobre la portada */
+}
+
+.foto-perfil {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    border: 5px solid white;
+    background: #eee;
+    object-fit: cover;
+}
+
+.datos-usuario {
+    margin-left: 20px;
+    padding-bottom: 10px;
+}
+
+.datos-usuario h1 {
+    margin: 0;
+    color: #1B365D;
+}
+
+.datos-usuario p {
+    color: #666;
+    margin: 5px 0 15px 0;
+}
+
+.btn-editar-perfil {
+    text-decoration: none;
+    background-color: #f2f2f2;
+    color: #333;
+    padding: 8px 15px;
+    border-radius: 6px;
+    font-weight: bold;
+    font-size: 0.9rem;
+    transition: 0.3s;
+}
+
+.btn-editar-perfil:hover {
+    background-color: #e4e6eb;
+}
+
+/* Sección de posts del usuario */
+.mis-publicaciones {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.mis-publicaciones h3 {
+    color: #1B365D;
+    border-bottom: 2px solid #FFD700;
+    display: inline-block;
+    margin-bottom: 15px;
+}
+
+.post-card {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+}

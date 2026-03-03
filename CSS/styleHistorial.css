@@ -1,0 +1,121 @@
+body {
+    background-color: #F0F2F5;
+    margin: 0;
+    padding-top: 80px;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+.filter-section {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 30px;
+}
+
+.filter-card {
+    background-color: #FFD700; 
+    padding: 25px;
+    border-radius: 15px;
+    display: flex;
+    gap: 20px;
+    align-items: flex-end;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+}
+
+.filter-group label {
+    font-size: 0.75rem;
+    font-weight: bold;
+    color: #1B365D;
+    margin-bottom: 5px;
+    text-transform: uppercase;
+}
+
+.filter-group input {
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    outline: none;
+}
+
+.btn-buscar {
+    background-color: #1B365D;
+    color: white;
+    border: none;
+    padding: 10px 25px;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+
+.mundiales-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.mundial-card {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    border: 1px solid #ddd;
+    transition: transform 0.3s;
+}
+
+.mundial-card:hover {
+    transform: translateY(-5px);
+}
+
+.bandera {
+    height: 120px;
+    background: #f8f8f8;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 4rem;
+    border-bottom: 3px solid #2D5A27;
+}
+
+.mundial-foto {
+    width: 100%;       
+    height: 160px;      
+    object-fit: cover;  
+    border-bottom: 3px solid #2D5A27; 
+}
+
+.card-content {
+    padding: 20px;
+    text-align: left;
+}
+
+.card-content h3 {
+    color: #1B365D;
+    margin-top: 0;
+    font-size: 1.1rem;
+}
+
+.card-content p {
+    color: #666;
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+.btn-ver {
+    display: inline-block;
+    margin-top: 15px;
+    color: #A62626;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+
+.btn-ver:hover { text-decoration: underline; }
