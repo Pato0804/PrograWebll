@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Perfil</title>
+    <link rel="stylesheet" href="CSS/styleNavar.css">
+    <link rel="stylesheet" href="CSS/stylePerfil.css">
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-links">
+                <a href="principal.html">Inicio</a>
+                <a href="explorar.html">Explorar</a>
+                <a href="perfil.html" class="active">Perfil</a>
+                <a href="historial.html">Historial</a>
+            </div>
+            <div class="nav-search">
+                <input type="text" placeholder="Buscar...">
+                <button type="button">🔍</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="perfil-layout">
+        <header class="perfil-header">
+            <div class="portada"></div>
+            <div class="info-principal">
+                <div class="foto-perfil-wrapper">
+                    <img src="https://via.placeholder.com/150" alt="Foto de Perfil" class="foto-perfil">
+                </div>
+                <div class="datos-usuario">
+                    <h1>Nombre del Usuario</h1>
+                    <p> México | usuario@correo.com</p>
+                    <a href="editarPerfil.html" class="btn-editar-perfil"> Editar Perfil </a>
+                </div>
+            </div>
+        </header>
+
+        <main class="mis-publicaciones">
+            <h3>Mis memorias mundialistas</h3>
+            
+            <div class="post-card">
+                <div class="post-header"><strong>Tú</strong> • Hace 1 día</div>
+                <p>¡Esperando con ansias el próximo mundial en casa!</p>
+                <div class="post-footer">
+                    <button>⚽ 12 Me Gusta</button>
+                    <button>🗑️ Eliminar</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+</body>
+</html>

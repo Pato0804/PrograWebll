@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configuración de Perfil</title>
+    <link rel="stylesheet" href="CSS/styleNavar.css">
+    <link rel="stylesheet" href="CSS/styleEditarPerfil.css">
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-links">
+                <a href="principal.html">Inicio</a>
+                <a href="explorar.html">Explorar</a>
+                <a href="perfil.html" class="active">Perfil</a>
+                <a href="historial.html">Historial</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-edit">
+        <div class="edit-card">
+            <h2>Configuración de la Cuenta</h2>
+
+            <form>
+                <div class="section-title">Datos Personales</div>
+                <div class="photo-edit">
+                    <img src="https://via.placeholder.com/80" alt="Avatar">
+                    <div class="file-input">
+                        <label for="new-photo">Cambiar foto de perfil</label>
+                        <input type="file" id="new-photo" accept="image/*">
+                    </div>
+                </div>
+
+                <div class="form-grid">
+                    <input type="text" placeholder="Nombre completo" value="Nombre Actual">
+                    <input type="text" placeholder="País" value="México">
+                </div>
+                <input type="email" placeholder="Correo electrónico">
+
+                <div class="section-title">Seguridad</div>
+                <input type="password" placeholder="Contraseña actual (Obligatorio para cambios)" required>
+                
+                <div class="form-grid">
+                    <input type="password" placeholder="Nueva contraseña (Opcional)">
+                    <input type="password" placeholder="Confirmar nueva contraseña">
+                </div>
+
+                <div class="button-group">
+                    <button type="reset" class="btn-clear">Limpiar</button>
+                    <button type="submit" class="btn-save">Guardar Cambios</button>
+                </div>
+            </form>
+            
+            <a href="perfil.html" class="back-link">Volver a mi perfil</a>
+        </div>
+    </div>
+
+</body>
+</html>
