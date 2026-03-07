@@ -26,26 +26,11 @@
 
     <div class="container-detalle">
         
-        <header class="mundial-hero">
+        <header class="mundial-hero" id="hero-header">
             <div class="hero-content">
-                <span class="badge">Sede: Qatar 🇶🇦</span>
-                <h1>MUNDIAL 2022</h1>
-                <p class="resumen">Una final histórica donde Messi levantó la copa tras vencer a Francia en penales.</p>
-                
-                <div class="stats-grid">
-                    <div class="stat-item">
-                        <strong>CAMPEÓN</strong>
-                        <span>Argentina 🇦🇷</span>
-                    </div>
-                    <div class="stat-item">
-                        <strong>SUB-CAMPEÓN</strong>
-                        <span>Francia 🇫🇷</span>
-                    </div>
-                    <div class="stat-item">
-                        <strong>BOTA DE ORO</strong>
-                        <span>Mbappé (8 goles)</span>
-                    </div>
-                </div>
+                <span class="badge" id="badge-sede">Sede: Cargando...</span>
+                <h1 id="titulo-mundial">MUNDIAL...</h1>
+                <p class="resumen" id="resumen-mundial">Cargando información del mundial...</p>
             </div>
         </header>
 
@@ -91,6 +76,43 @@
 
         <a href="historial.html" class="back-link">Volver al Historial</a>
     </div>
+
+    <script>
+        const parametrosURL = new URLSearchParams(window.location.search);
+        const añoSeleccionado = parametrosURL.get('year');
+
+        function mostrarError() {
+            document.getElementById('badge-sede').style.display = 'none';
+            document.getElementById('titulo-mundial').innerText = "Mundial no encontrado";
+            document.getElementById('resumen-mundial').innerText = "La información de este mundial aún no está en la base de datos.";
+        }
+
+        if (añoSeleccionado) {
+            fetch(`http://localhost:3000/mundiales/buscar/${añoSeleccionado}`)
+                .then(respuesta => respuesta.json())
+                .then(datos => {
+                    if (datos.error) {
+                        mostrarError();
+                    } else {
+                        document.getElementById('badge-sede').innerText = `Sede: ${datos.sede}`;
+                        document.getElementById('titulo-mundial').innerText = datos.nombre;
+                        document.getElementById('resumen-mundial').innerText = datos.descripcion;
+                        
+                        // Cambiar fondo si hay imagen en la BD
+                        if (datos.imagen_url) {
+                            const hero = document.getElementById('hero-header');
+                            hero.style.backgroundImage = `linear-gradient(rgba(27, 54, 93, 0.9), rgba(27, 54, 93, 0.9)), url('${datos.imagen_url}')`;
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error de conexión:', error);
+                    mostrarError();
+                });
+        } else {
+            mostrarError();
+        }
+    </script>
 
 </body>
 </html>
