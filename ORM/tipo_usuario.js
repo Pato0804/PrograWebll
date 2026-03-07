@@ -1,8 +1,8 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../database.js";
 
-const Categoria =sequelize.define("Categoria",{
-    id_categoria:{
+const TipoUsuario =sequelize.define("TipoUsuario",{
+    id_tipo_usuario:{
         type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement:true
@@ -17,9 +17,9 @@ const Categoria =sequelize.define("Categoria",{
     }
     
     },{
-        tableName:"categorias",
+        tableName:"tipo_de_usuario",
         timestamps:false
 
 });
 
-export default Categoria;
+export default TipoUsuario;
