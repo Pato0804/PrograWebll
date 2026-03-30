@@ -1,45 +1,48 @@
 import express from 'express';
-import Amistad from './ORM/amistades.js';
+import Friendship from './ORM/amistades.js';
 
 const router =express.Router();
 
 router.get('/',async(req, res) => {
-    const amistades= await Amistad.findAll();
-    res.json(amistades);
+    const friendships= await Friendship.findAll();
+    res.json(friendships);
 });
 
 router.get('/:id',async(req, res) => {
-    const amistades= await Amistad.findByPk(req.params.id);
-    res.json(amistades);
+    const friendships= await Friendship.findByPk(req.params.id);
+    res.json(friendships);
 });
 
 router.post('/',async(req, res) => {
-    const {id_solicitante,id_receptor,estado,fecha_solicitud}=req.body;
-    const nuevoAmistad=await Amistad.create({
-        id_solicitante,
-        id_receptor,
-        estado,
-        fecha_solicitud
+    const {requester_id,
+        receiver_id,
+        status,
+        request_date}=req.body;
+    const newFriendship=await Friendship.create({
+        requester_id,
+        receiver_id,
+        status,
+        request_date
     });
-    res.send(`Tipo de Usuario creado exitosamente xd`);
+    res.send(`Friendship created successfully xd`);
 });
 
 
 router.patch('/:id',async(req, res) => {
-    const amistades=await Amistad.findByPk(req.params.id);
-    await amistades.update(req.body);
+    const friendships=await Friendship.findByPk(req.params.id);
+    await friendships.update(req.body);
 
     
-    res.send(`Actualizaciones señores, 
-        actualizaciones`);
+    res.send(`Upgrades people, 
+        upgrades`);
 });
 
 router.delete('/:id',async(req, res) => {
-    const amistades=await Amistad.findByPk(req.params.id);
+    const friendships=await Friendship.findByPk(req.params.id);
  
 
-    await amistades.destroy();
-    res.send(`No me siento bien señor stark`);
+    await friendships.destroy();
+    res.send(`Im not fellin good mr stark`);
 });
 
 export default router;

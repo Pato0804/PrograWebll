@@ -1,43 +1,43 @@
 import express from 'express';
-import Categoria from './ORM/categorias.js';
+import Category from './ORM/categorias.js';
 
 const router =express.Router();
 
 router.get('/',async(req, res) => {
-    const categorias= await Categoria.findAll();
-    res.json(categorias);
+    const categories= await Category.findAll();
+    res.json(categories);
 });
 
 router.get('/:id',async(req, res) => {
-    const categorias= await Categoria.findByPk(req.params.id);
-    res.json(categorias);
+    const categories= await Category.findByPk(req.params.id);
+    res.json(categories);
 });
 
 router.post('/',async(req, res) => {
-    const {nombre,descripcion}=req.body;
-    const nuevoCategoria=await Categoria.create({
-        nombre,
-        descripcion
+    const {name,description}=req.body;
+    const newCategory=await Category.create({
+        name,
+        description
     });
-    res.send(`Usuario creado exitosamente xd`);
+    res.send(`Category created successfully xd`);
 });
 
 
 router.patch('/:id',async(req, res) => {
-    const categorias=await Categoria.findByPk(req.params.id);
-    await categorias.update(req.body);
+    const categories=await Category.findByPk(req.params.id);
+    await categories.update(req.body);
 
     
-    res.send(`Actualizaciones señores, 
-        actualizaciones`);
+    res.send(`Upgrades people, 
+        upgrades`);
 });
 
 router.delete('/:id',async(req, res) => {
-    const categorias=await Categoria.findByPk(req.params.id);
+    const categories=await Category.findByPk(req.params.id);
  
 
-    await categorias.destroy();
-    res.send(`No me siento bien señor stark`);
+    await categories.destroy();
+    res.send(`Im not fellin good mr stark`);
 });
 
 export default router;

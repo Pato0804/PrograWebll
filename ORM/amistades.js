@@ -1,32 +1,32 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../database.js";
 
-const Amistad =sequelize.define("Amistad",{
-    id_amistad:{
+const Friendship =sequelize.define("Friendship",{
+    id_friendship:{
         type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement:true
     },
-    id_solicitante:{
+    requester_id:{
         type: DataTypes.INTEGER,
         allowNull:false
     },
-    id_receptor:{
+    receiver_id:{
         type: DataTypes.INTEGER,
         allowNull:false
     },
-    estado:{
+    status:{
         type:DataTypes.ENUM("pendiente","aceptada","rechazada"),
         defaultValue:"pendiente"
     },
-    fecha_solicitud:{
+    request_date:{
         type:DataTypes.DATE,
         defaultValue:DataTypes.NOW
     }
     },{
-        tableName:"amistades",
+        tableName:"friendships",
         timestamps:false
 
 });
 
-export default Amistad;
+export default Friendship;

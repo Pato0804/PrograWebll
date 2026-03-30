@@ -1,25 +1,25 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../database.js";
 
-const TipoUsuario =sequelize.define("TipoUsuario",{
-    id_tipo_usuario:{
+const UserType =sequelize.define("UserType",{
+    id_user_type:{
         type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement:true
     },
-    nombre:{
+    name:{
         type:DataTypes.STRING(50),
         allowNull:false
     },
-    descripcion:{
+    description:{
         type:DataTypes.TEXT,
         allowNull:true
     }
     
     },{
-        tableName:"tipo_de_usuario",
+        tableName:"user_types",
         timestamps:false
 
 });
 
-export default TipoUsuario;
+export default UserType;

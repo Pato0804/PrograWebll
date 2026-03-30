@@ -1,44 +1,42 @@
 import express from 'express';
-import Usuario from './ORM/usuarios.js';
+import User from './ORM/usuarios.js';
 
 const router =express.Router();
 
 router.get('/',async(req, res) => {
-    const usuarios= await Usuario.findAll();
-    res.json(usuarios);
+    const users= await User.findAll();
+    res.json(users);
 });
 
 router.get('/:id',async(req, res) => {
-    const usuario= await Usuario.findByPk(req.params.id);
-    res.json(usuario);
+    const users= await User.findByPk(req.params.id);
+    res.json(users);
 });
 
 router.post('/',async(req, res) => {
-    const {nombre_completo,email,contrasena}=req.body;
-    const nuevoUsuario=await Usuario.create({
-        nombre_completo,
-        email,
-        contrasena
+    const {full_name,birth_date,photo_url,gender,country,birth_place,email,password,id_user_type}=req.body;
+    const newUser=await User.create({
+        full_name,birth_date,photo_url,gender,country,birth_place,email,password,id_user_type
     });
-    res.send(`Usuario creado exitosamente xd`);
+    res.send(`UserType created successfully xd`);
 });
 
 
 router.patch('/:id',async(req, res) => {
-    const usuario=await Usuario.findByPk(req.params.id);
-    await usuario.update(req.body);
+    const users=await User.findByPk(req.params.id);
+    await users.update(req.body);
 
     
-    res.send(`Actualizaciones señores, 
-        actualizaciones`);
+    res.send(`Upgrades people, 
+        upgrades`);
 });
 
 router.delete('/:id',async(req, res) => {
-    const usuario=await Usuario.findByPk(req.params.id);
+    const users=await User.findByPk(req.params.id);
  
 
-    await usuario.destroy();
-    res.send(`No me siento bien señor stark`);
+    await users.destroy();
+    res.send(`Im not fellin good mr stark`);
 });
 
 export default router;

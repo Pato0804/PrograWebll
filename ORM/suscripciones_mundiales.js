@@ -1,28 +1,28 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../database.js";
 
-const Suscripcion =sequelize.define("Suscripcion",{
-    id_suscripcion:{
+const Subscription =sequelize.define("Subscription",{
+    id_subscription:{
         type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement:true
     },
-    id_usuario:{
+    id_user:{
         type: DataTypes.INTEGER,
         allowNull:false
     },
-    id_mundial:{
+    id_world_cup:{
         type: DataTypes.INTEGER,
         allowNull:false
     },
-    fecha_suscripcion:{
+    subscription_date:{
         type:DataTypes.DATE,
         defaultValue:DataTypes.NOW
     }
     },{
-        tableName:"suscripciones_mundiales",
+        tableName:"subscriptions",
         timestamps:false
 
 });
 
-export default Suscripcion;
+export default Subscription;

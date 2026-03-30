@@ -1,25 +1,25 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../database.js";
 
-const Categoria =sequelize.define("Categoria",{
-    id_categoria:{
+const Category =sequelize.define("Category",{
+    id_category:{
         type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement:true
     },
-    nombre:{
+    name:{
         type:DataTypes.STRING(50),
         allowNull:false
     },
-    descripcion:{
+    description:{
         type:DataTypes.TEXT,
         allowNull:true
     }
     
     },{
-        tableName:"categorias",
+        tableName:"categories",
         timestamps:false
 
 });
 
-export default Categoria;
+export default Category;

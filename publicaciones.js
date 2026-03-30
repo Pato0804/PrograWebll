@@ -1,46 +1,46 @@
 import express from 'express';
-import Publicacion from './ORM/publicaciones.js';
+import Post from './ORM/publicaciones.js';
 
 const router =express.Router();
 
 router.get('/',async(req, res) => {
-    const publicaciones= await Publicacion.findAll();
-    res.json(publicaciones);
+    const posts= await Post.findAll();
+    res.json(posts);
 });
 
 router.get('/:id',async(req, res) => {
-    const publicaciones= await Publicacion.findByPk(req.params.id);
-    res.json(publicaciones);
+    const posts= await Post.findByPk(req.params.id);
+    res.json(posts);
 });
 
 router.post('/',async(req, res) => {
-    const {titulo,mensaje,imagen_url,video_url,fecha_creacion,
-        fecha_aprobacion,estatus_aprobacion,
-        id_usuario,id_mundial,id_categoria}=req.body;
-    const nuevoPublicacion=await Publicacion.create({
-        titulo,mensaje,imagen_url,video_url,fecha_creacion,
-        fecha_aprobacion,estatus_aprobacion,
-        id_usuario,id_mundial,id_categoria
+    const {title,content,image_url,video_url,created_at,
+        approved_at,is_approved,
+        id_user,id_world_cup,id_category}=req.body;
+    const newPost=await Post.create({
+        title,content,image_url,video_url,created_at,
+        approved_at,is_approved,
+        id_user,id_world_cup,id_category
     });
-    res.send(`Publicacion creado exitosamente xd`);
+    res.send(`Post  created successfully xd`);
 });
 
 
 router.patch('/:id',async(req, res) => {
-    const publicaciones=await Publicacion.findByPk(req.params.id);
-    await publicaciones.update(req.body);
+    const posts=await Post.findByPk(req.params.id);
+    await posts.update(req.body);
 
     
-    res.send(`Actualizaciones señores, 
-        actualizaciones`);
+    res.send(`Upgrades people, 
+        upgrades`);
 });
 
 router.delete('/:id',async(req, res) => {
-    const publicaciones=await Publicacion.findByPk(req.params.id);
+    const posts=await Post.findByPk(req.params.id);
  
 
-    await publicaciones.destroy();
-    res.send(`No me siento bien señor stark`);
+    await posts.destroy();
+    res.send(`Im not fellin good mr stark`);
 });
 
 export default router;

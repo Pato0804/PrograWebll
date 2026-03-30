@@ -1,34 +1,34 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../database.js";
 
-const Mundial =sequelize.define("Mundial",{
-    id_mundial:{
+const WorldCup =sequelize.define("WorldCup",{
+    id_world_cup:{
         type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement:true
     },
-    nombre:{
+    name:{
         type:DataTypes.STRING,
         allowNull:false
     },
-    fecha:{
+    date:{
         type:DataTypes.DATEONLY,
         allowNull:false
     },
-    sede:{
+    host:{
         type:DataTypes.STRING,
         
     },
-    imagen_url:{
+    image_url:{
         type:DataTypes.TEXT
     },
-    descripcion:{
+    description:{
         type:DataTypes.TEXT
     }
     },{
-        tableName:"mundiales",
+        tableName:"world_cups",
         timestamps:false
 
 });
 
-export default Mundial;
+export default WorldCup;

@@ -1,43 +1,42 @@
 import express from 'express';
-import TipoUsuario from './ORM/tipo_usuario.js';
+import UserType from './ORM/tipo_usuario.js';
 
 const router =express.Router();
 
 router.get('/',async(req, res) => {
-    const tipo_de_usuario= await TipoUsuario.findAll();
-    res.json(tipo_de_usuario);
+    const user_types= await UserType.findAll();
+    res.json(user_types);
 });
 
 router.get('/:id',async(req, res) => {
-    const tipo_de_usuario= await TipoUsuario.findByPk(req.params.id);
-    res.json(tipo_de_usuario);
+    const user_types= await UserType.findByPk(req.params.id);
+    res.json(user_types);
 });
 
 router.post('/',async(req, res) => {
-    const {nombre_completo,descripcion}=req.body;
-    const nuevoTipoUsuario=await TipoUsuario.create({
-        nombre_completo,
-        descripcion
+    const {name,description}=req.body;
+    const newUserType=await UserType.create({
+        name,description
     });
-    res.send(`Tipo de Usuario creado exitosamente xd`);
+    res.send(`UserType created successfully xd`);
 });
 
 
 router.patch('/:id',async(req, res) => {
-    const tipo_de_usuario=await TipoUsuario.findByPk(req.params.id);
-    await tipo_de_usuario.update(req.body);
+    const user_types=await UserType.findByPk(req.params.id);
+    await user_types.update(req.body);
 
     
-    res.send(`Actualizaciones señores, 
-        actualizaciones`);
+    res.send(`Upgrades people, 
+        upgrades`);
 });
 
 router.delete('/:id',async(req, res) => {
-    const tipo_de_usuario=await TipoUsuario.findByPk(req.params.id);
+    const user_types=await UserType.findByPk(req.params.id);
  
 
-    await tipo_de_usuario.destroy();
-    res.send(`No me siento bien señor stark`);
+    await user_types.destroy();
+    res.send(`Im not fellin good mr stark`);
 });
 
 export default router;

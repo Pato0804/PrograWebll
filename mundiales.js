@@ -1,42 +1,42 @@
 import express from 'express';
-import Mundial from './ORM/mundiales.js';
+import WorldCup from './ORM/mundiales.js';
 
 const router =express.Router();
 
 router.get('/',async(req, res) => {
-    const mundiales= await Mundial.findAll();
-    res.json(mundiales);
+    const world_cups= await WorldCup.findAll();
+    res.json(world_cups);
 });
 
 router.get('/:id',async(req, res) => {
-    const mundiales= await Mundial.findByPk(req.params.id);
-    res.json(mundiales);
+    const world_cups= await WorldCup.findByPk(req.params.id);
+    res.json(world_cups);
 });
 
 router.post('/',async(req, res) => {
-    const {nombre,fecha,sede,imagen_url,descripcion}=req.body;
-    const nuevoComentario=await Mundial.create({
-        nombre,fecha,sede,imagen_url,descripcion
+    const {name,date,host,image_url,description}=req.body;
+    const newWorldCup=await WorldCup.create({
+        name,date,host,image_url,description
     });
-    res.send(`Mundial creado exitosamente xd`);
+    res.send(`WorldCup created successfully xd`);
 });
 
 
 router.patch('/:id',async(req, res) => {
-    const mundiales=await Mundial.findByPk(req.params.id);
-    await mundiales.update(req.body);
+    const world_cups=await WorldCup.findByPk(req.params.id);
+    await world_cups.update(req.body);
 
     
-    res.send(`Actualizaciones señores, 
-        actualizaciones`);
+    res.send(`Upgrades people, 
+        upgrades`);
 });
 
 router.delete('/:id',async(req, res) => {
-    const mundiales=await Mundial.findByPk(req.params.id);
+    const world_cups=await WorldCup.findByPk(req.params.id);
  
 
-    await mundiales.destroy();
-    res.send(`No me siento bien señor stark`);
+    await world_cups.destroy();
+    res.send(`Im not fellin good mr stark`);
 });
 
 export default router;

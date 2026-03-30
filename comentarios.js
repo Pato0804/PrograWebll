@@ -1,46 +1,46 @@
 import express from 'express';
-import Comentario from './ORM/comentarios.js';
+import Comment from './ORM/comentarios.js';
 
 const router =express.Router();
 
 router.get('/',async(req, res) => {
-    const comentarios= await Comentario.findAll();
-    res.json(comentarios);
+    const comments= await Comment.findAll();
+    res.json(comments);
 });
 
 router.get('/:id',async(req, res) => {
-    const comentarios= await Comentario.findByPk(req.params.id);
-    res.json(comentarios);
+    const comments= await Comment.findByPk(req.params.id);
+    res.json(comments);
 });
 
 router.post('/',async(req, res) => {
-    const {texto,fecha_creacion,id_usuario,id_publicacion,pais}=req.body;
-    const nuevoComentario=await Comentario.create({
-        texto,
-        fecha_creacion,
-        id_usuario,
-        id_publicacion,
+    const {content,created_at,id_user,id_post,pais}=req.body;
+    const newComment=await Comment.create({
+        content,
+        created_at,
+        id_user,
+        id_post,
         pais
     });
-    res.send(`Comentario creado exitosamente xd`);
+    res.send(`Comment created successfully xd`);
 });
 
 
 router.patch('/:id',async(req, res) => {
-    const comentarios=await Comentario.findByPk(req.params.id);
-    await comentarios.update(req.body);
+    const comments=await Comment.findByPk(req.params.id);
+    await comments.update(req.body);
 
     
-    res.send(`Actualizaciones señores, 
-        actualizaciones`);
+    res.send(`Upgrades people, 
+        upgrades`);
 });
 
 router.delete('/:id',async(req, res) => {
-    const comentarios=await Comentario.findByPk(req.params.id);
+    const comments=await Comment.findByPk(req.params.id);
  
 
-    await comentarios.destroy();
-    res.send(`No me siento bien señor stark`);
+    await comments.destroy();
+    res.send(`Im not fellin good mr stark`);
 });
 
 export default router;

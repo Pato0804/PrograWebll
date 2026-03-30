@@ -1,22 +1,22 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../database.js";
 
-const Publicacion =sequelize.define("Publicacion",{
-    id_notificacion:{
+const Post =sequelize.define("Post",{
+    id_post:{
         type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement:true
     },
     
-    titulo:{
+    title:{
         type:DataTypes.STRING,
         allowNull:false
     },
-    mensaje:{
+    content:{
         type:DataTypes.TEXT,
         allowNull:false
     },
-    imagen_url:{
+    image_url:{
         type:DataTypes.TEXT,
         
     },
@@ -24,32 +24,32 @@ const Publicacion =sequelize.define("Publicacion",{
         type:DataTypes.STRING,
         
     },
-    fecha_creacion:{
+    created_at:{
         type:DataTypes.DATE,
         defaultValue:DataTypes.NOW
     },
-    fecha_aprobacion:{
+    approved_at:{
         type:DataTypes.DATE,
         
     },
-    estatus_aprobacion:{
+    is_approved:{
         type:DataTypes.BOOLEAN,
         defaultValue:false
     },
-    id_usuario:{
+    id_user:{
         type: DataTypes.INTEGER,
         allowNull:false
-    },id_mundial:{
+    },id_world_cup:{
         type: DataTypes.INTEGER,
         allowNull:false
-    },id_categoria:{
+    },id_category:{
         type: DataTypes.INTEGER,
         
     }
     },{
-        tableName:"publicaciones",
+        tableName:"posts",
         timestamps:false
 
 });
 
-export default Publicacion;
+export default Post;

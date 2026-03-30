@@ -1,37 +1,37 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../database.js";
 
-const Notificacion =sequelize.define("Notificacion",{
-    id_notificacion:{
+const Notification =sequelize.define("Notification",{
+    id_notification:{
         type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement:true
     },
-    id_usuario:{
+    id_user:{
         type: DataTypes.INTEGER,
         allowNull:false
     },
-    mensaje:{
+    message:{
         type:DataTypes.STRING,
         allowNull:false
     },
     
-    tipo:{
+    type:{
         type:DataTypes.ENUM("amistad","comentario","reaccion","sistema"),
         allowNull:false
     },
-    leido:{
+    is_read:{
         type:DataTypes.BOOLEAN,
         defaultValue:false
     },
-    fecha_creacion:{
+    created_at:{
         type:DataTypes.DATE,
         defaultValue:DataTypes.NOW
     }
     },{
-        tableName:"notificaciones",
+        tableName:"notifications",
         timestamps:false
 
 });
 
-export default Notificacion;
+export default Notification;

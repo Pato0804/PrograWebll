@@ -1,33 +1,33 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../database.js";
 
-const Usuario =sequelize.define("Usuario",{
-    id_usuario:{
+const User =sequelize.define("User",{
+    id_user:{
         type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement:true
     },
-    nombre_completo:{
+    full_name:{
         type:DataTypes.STRING,
         allowNull:false
     },
-    fecha_nacimiento:{
+    birth_date:{
         type:DataTypes.DATEONLY,
         allowNull:false
     },
-    foto_url:{
+    photo_url:{
         type:DataTypes.TEXT,
         allowNull:true
     },
-    genero:{
+    gender:{
         type:DataTypes.ENUM("Masculino","Femenino"),
         allowNull:true
     },
-    pais:{
+    country:{
         type:DataTypes.STRING(50),
         allowNull:true
     },
-    lugar_nacimiento:{
+    birth_place:{
         type:DataTypes.STRING(100),
         allowNull:true
     },
@@ -35,18 +35,18 @@ const Usuario =sequelize.define("Usuario",{
         type:DataTypes.STRING,
         allowNull:false
     },
-    contrasena:{
+    password:{
         type:DataTypes.STRING,
         allowNull:false
     },
-    id_tipo_usuario:{
+    id_user_type:{
         type:DataTypes.INTEGER,
         allowNull:false
     }
     },{
-        tableName:"usuarios",
+        tableName:"users",
         timestamps:false
 
 });
 
-export default Usuario;
+export default User;

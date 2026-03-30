@@ -1,32 +1,32 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../database.js";
 
-const Reaccion =sequelize.define("Reaccion",{
-    id_reaccion:{
+const Reaction =sequelize.define("Reaction",{
+    id_reaction:{
         type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement:true
     },
-    id_usuario:{
+    id_user:{
         type: DataTypes.INTEGER,
         allowNull:false
     },
-    id_publicacion:{
+    id_post:{
         type: DataTypes.INTEGER,
         allowNull:false
     },
-    tipo:{
+    type:{
         type: DataTypes.ENUM("like","dislike"),
         allowNull:false
     },
-    fecha_reaccion:{
+    created_at:{
         type:DataTypes.DATE,
         defaultValue:DataTypes.NOW
     }
     },{
-        tableName:"reacciones",
+        tableName:"reactions",
         timestamps:false
 
 });
 
-export default Reaccion;
+export default Reaction;

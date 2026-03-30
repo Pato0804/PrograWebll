@@ -1,42 +1,42 @@
 import express from 'express';
-import Reaccion from './ORM/reacciones.js';
+import Reaction from './ORM/reacciones.js';
 
 const router =express.Router();
 
 router.get('/',async(req, res) => {
-    const reacciones= await Reaccion.findAll();
-    res.json(reacciones);
+    const reactions= await Reaction.findAll();
+    res.json(reactions);
 });
 
 router.get('/:id',async(req, res) => {
-    const reacciones= await Reaccion.findByPk(req.params.id);
-    res.json(reacciones);
+    const reactions= await Reaction.findByPk(req.params.id);
+    res.json(reactions);
 });
 
 router.post('/',async(req, res) => {
-    const {id_usuario,id_publicacion,tipo,fecha_reaccion}=req.body;
-    const nuevoReaccion=await Reaccion.create({
-        id_usuario,id_publicacion,tipo,fecha_reaccion
+    const {id_user,id_post,type,created_at}=req.body;
+    const newReaction=await Reaction.create({
+        id_user,id_post,type,created_at
     });
-    res.send(`Reaccion creado exitosamente xd`);
+    res.send(`Reaction created successfully xd`);
 });
 
 
 router.patch('/:id',async(req, res) => {
-    const reacciones=await Reaccion.findByPk(req.params.id);
-    await reacciones.update(req.body);
+    const reactions=await Reaction.findByPk(req.params.id);
+    await reactions.update(req.body);
 
     
-    res.send(`Actualizaciones señores, 
-        actualizaciones`);
+    res.send(`Upgrades people, 
+        upgrades`);
 });
 
 router.delete('/:id',async(req, res) => {
-    const reacciones=await Reaccion.findByPk(req.params.id);
+    const reactions=await Reaction.findByPk(req.params.id);
  
 
-    await reacciones.destroy();
-    res.send(`No me siento bien señor stark`);
+    await reactions.destroy();
+    res.send(`Im not fellin good mr stark`);
 });
 
 export default router;
