@@ -42,223 +42,57 @@
         </div>
     </div>
 
-    <main class="mundiales-grid">
+<main class="mundiales-grid" id="world-cups-container">
+        </main>
 
-        <div class="mundial-card">
-            <div style="display: flex; width: 100%;">
-                <img src="https://flagcdn.com/w640/us.png" alt="bandera de estados unidos" class="mundial-foto" style="width: 33%; object-fit: cover;">
-                <img src="https://flagcdn.com/w640/mx.png" alt="bandera de méxico" class="mundial-foto" style="width: 33%; object-fit: cover;">
-                <img src="https://flagcdn.com/w640/ca.png" alt="bandera de canada" class="mundial-foto" style="width: 33%; object-fit: cover;">
-            </div>
-            <div class="card-content">
-                <h3>MUNDIAL 2026 - MÉXICO / ESTADOS UNIDOS / CANADA</h3>
-                <p>El primer mundial en Asia coronó a Brasil con su "Pentacampeonato" de la mano de Ronaldo.</p>
-                <a href="../HTML/worldcup-details.html?year=2026" class="btn-ver">Ver más</a>
-            </div>
-        </div>
-        
-        <div class="mundial-card">
-            <img src="https://flagcdn.com/w640/qa.png" alt="bandera de qatar" class="mundial-foto">
-            <div class="card-content">
-                <h3>MUNDIAL 2022 - QATAR</h3>
-                <p>El primer mundial en tierras árabes y el cierre épico para la carrera de Messi.</p>
-                <a href="../HTML/worldcup-details.html?year=2022" class="btn-ver">Ver más</a>
-            </div>
-        </div>
+        <script>
+            
+    const worldCupsContainer = document.getElementById('world-cups-container');
 
-        <div class="mundial-card">
-            <img src="https://flagcdn.com/w640/ru.png" alt="bandera de rusia" class="mundial-foto">
-            <div class="card-content">
-                <h3>MUNDIAL 2018 - RUSIA</h3>
-                <p>Un torneo lleno de sorpresas donde Francia demostró su poderío y la tecnología del VAR cambió el fútbol para siempre.</p>
-                <a href="../HTML/worldcup-details.html?year=2018" class="btn-ver">Ver más</a>
-            </div>
-        </div>
+    async function loadWorldCups() {
+        try {
+            const response = await fetch('http://localhost:3000/world-cups');
+            
+            if (!response.ok) {
+                throw new Error('Error fetching world cups');
+            }
 
+            const worldCups = await response.json();
 
-        <div class="mundial-card">
-            <img src="https://flagcdn.com/w640/br.png" alt="bandera de brasil" class="mundial-foto">
-            <div class="card-content">
-                <h3>MUNDIAL 2014 - BRASIL</h3>
-                <p>¡El mundial de la alegría! Una fiesta total en las gradas, el inolvidable 7-1 y Alemania levantando la copa en el Maracaná.</p>
-                <a href="../HTML/worldcup-details.html?year=2014" class="btn-ver">Ver más</a>
-            </div>
-        </div>
+            worldCupsContainer.innerHTML = '';
 
-        <div class="mundial-card">
-             <img src="https://flagcdn.com/w640/za.png" alt="bandera de sudafrica" class="mundial-foto">
-            <div class="card-content">
-                <h3>MUNDIAL 2010 - SUDÁFRICA</h3>
-                <p>El mundial del Waka Waka y la primera estrella para la selección de España.</p>
-                <a href="../HTML/worldcup-details.html?year=2010" class="btn-ver">Ver más</a>
-            </div>
-        </div>
+            worldCups.forEach(worldCup => {
+                const card = document.createElement('div');
+                card.className = 'mundial-card'; 
 
-        <div class="mundial-card">
-            <img src="https://flagcdn.com/w640/de.png" alt="bandera de alemania" class="mundial-foto">
-                <div class="card-content">
-                    <h3>MUNDIAL 2006 - ALEMANIA</h3>
-                    <p>El "Cuento de Verano". Un mundial con estadios increíbles donde Italia se llevó la copa en una final inolvidable.</p>
-                    <a href="../HTML/worldcup-details.html?year=2006" class="btn-ver">Ver más</a>
-                </div>
-        </div>        
+                const displayImage = worldCup.image_url ? worldCup.image_url : `https://placehold.co/640x360/1B365D/FFFFFF?text=${worldCup.name}`;
+                const year = worldCup.date ? worldCup.date.split('-')[0] : 'Unknown';
 
-        <div class="mundial-card">
-            <div style="display: flex; width: 100%;">
-                <img src="https://flagcdn.com/w640/kr.png" alt="bandera de corea del sur" class="mundial-foto" style="width: 50%; object-fit: cover;">
-                <img src="https://flagcdn.com/w640/jp.png" alt="bandera de japón" class="mundial-foto" style="width: 50%; object-fit: cover;">
-            </div>
-            <div class="card-content">
-                <h3>MUNDIAL 2002 - COREA / JAPÓN</h3>
-                <p>El primer mundial en Asia coronó a Brasil con su "Pentacampeonato" de la mano de Ronaldo.</p>
-                <a href="../HTML/worldcup-details.html?year=2002" class="btn-ver">Ver más</a>
-            </div>
-        </div>
+                card.innerHTML = `
+                    <img src="${displayImage}" alt="World Cup ${worldCup.name}" class="mundial-foto">
+                    <div class="card-content">
+                        <h3>${worldCup.name.toUpperCase()} - ${worldCup.host ? worldCup.host.toUpperCase() : ''}</h3>
+                        <p>${worldCup.description || 'No description available.'}</p>
+                        
+                        <a href="../HTML/worldcup-details.html?year=${year}" class="btn-ver">View more</a>
+                    </div>
+                `;
 
-        <div class="mundial-card">
-            <img src="https://flagcdn.com/w640/fr.png" alt="bandera de francia" class="mundial-foto">
-            <div class="card-content">
-                <h3>MUNDIAL 1998 - FRANCIA</h3>
-                <p>Zinedine Zidane guía a la anfitriona Francia a conseguir su primer campeonato del mundo.</p>
-                <a href="../HTML/worldcup-details.html?year=1998" class="btn-ver">Ver más</a>
-            </div>
-        </div>
+                worldCupsContainer.appendChild(card);
+            });
 
-        <div class="mundial-card">
-            <img src="https://flagcdn.com/w640/us.png" alt="bandera de estados unidos" class="mundial-foto">
-            <div class="card-content">
-                <h3>MUNDIAL 1994 - ESTADOS UNIDOS</h3>
-                <p>La primera final definida en tanda de penales le otorgó el histórico tetracampeonato a Brasil.</p>
-                <a href="../HTML/worldcup-details.html?year=1994" class="btn-ver">Ver más</a>
-            </div>
-        </div>
+            if(worldCups.length === 0){
+                worldCupsContainer.innerHTML = '<p style="grid-column: 1 / -1; text-align: center;">No world cups registered yet.</p>';
+            }
 
-        <div class="mundial-card">
-            <img src="https://flagcdn.com/w640/it.png" alt="bandera de italia" class="mundial-foto">
-            <div class="card-content">
-                <h3>MUNDIAL 1990 - ITALIA</h3>
-                <p>La revancha de Alemania Federal ante Argentina en un torneo caracterizado por defensas férreas.</p>
-                <a href="../HTML/worldcup-details.html?year=1990" class="btn-ver">Ver más</a>
-            </div>
-        </div>
+        } catch (error) {
+            console.error('Error loading history:', error);
+            worldCupsContainer.innerHTML = '<p style="grid-column: 1 / -1; text-align: center; color: red;">Error connecting to the server.</p>';
+        }
+    }
 
-        <div class="mundial-card">
-             <img src="https://flagcdn.com/w640/mx.png" alt="bandera de mexico" class="mundial-foto">
-            <div class="card-content">
-                <h3>MUNDIAL 1986 - MÉXICO</h3>
-                <p>La consagración de Maradona y el mundial de "La Mano de Dios".</p>
-                <a href="../HTML/worldcup-details.html?year=1986" class="btn-ver">Ver más</a>
-            </div>
-        </div>
-
-        <div class="mundial-card">
-            <img src="https://flagcdn.com/w640/es.png" alt="bandera de españa" class="mundial-foto">
-            <div class="card-content">
-                <h3>MUNDIAL 1982 - ESPAÑA</h3>
-                <p>El tercer título de Italia tras superar a un Brasil de ensueño y a una dura Alemania.</p>
-                <a href="../HTML/worldcup-details.html?year=1982" class="btn-ver">Ver más</a>
-            </div>
-        </div>
-
-        <div class="mundial-card">
-            <img src="https://flagcdn.com/w640/ar.png" alt="bandera de argentina" class="mundial-foto">
-            <div class="card-content">
-                <h3>MUNDIAL 1978 - ARGENTINA</h3>
-                <p>La primera consagración de la Albiceleste en casa bajo el liderazgo goleador de Mario Kempes.</p>
-                <a href="../HTML/worldcup-details.html?year=1978" class="btn-ver">Ver más</a>
-            </div>
-        </div>
-
-        <div class="mundial-card">
-            <img src="https://flagcdn.com/w640/de.png" alt="bandera de alemania" class="mundial-foto">
-            <div class="card-content">
-                <h3>MUNDIAL 1974 - ALEMANIA FEDERAL</h3>
-                <p>La victoria táctica alemana sobre la revolucionaria "Naranja Mecánica" de Johan Cruyff.</p>
-                <a href="../HTML/worldcup-details.html?year=1974" class="btn-ver">Ver más</a>
-            </div>
-        </div>
-
-        <div class="mundial-card">
-            <img src="https://flagcdn.com/w640/mx.png" alt="bandera de mexico" class="mundial-foto">
-            <div class="card-content">
-                <h3>MUNDIAL 1970 - MÉXICO</h3>
-                <p>Considerado uno de los mejores mundiales, con el Brasil de Pelé en su máximo esplendor.</p>
-                <a href="../HTML/worldcup-details.html?year=1970" class="btn-ver">Ver más</a>
-            </div>
-        </div>
-
-        <div class="mundial-card">
-            <img src="https://flagcdn.com/w640/gb-eng.png" alt="bandera de inglaterra" class="mundial-foto">
-            <div class="card-content">
-                <h3>MUNDIAL 1966 - INGLATERRA</h3>
-                <p>El único título mundial de los inventores del fútbol, logrado dramáticamente en casa.</p>
-                <a href="../HTML/worldcup-details.html?year=1966" class="btn-ver">Ver más</a>
-            </div>
-        </div>
-
-        <div class="mundial-card">
-            <img src="https://flagcdn.com/w640/cl.png" alt="bandera de chile" class="mundial-foto">
-            <div class="card-content">
-                <h3>MUNDIAL 1962 - CHILE</h3>
-                <p>Brasil logra el bicampeonato en un torneo recordado por su gran dureza física.</p>
-                <a href="../HTML/worldcup-details.html?year=1962" class="btn-ver">Ver más</a>
-            </div>
-        </div>
-
-        <div class="mundial-card">
-            <img src="https://flagcdn.com/w640/se.png" alt="bandera de suecia" class="mundial-foto">
-            <div class="card-content">
-                <h3>MUNDIAL 1958 - SUECIA</h3>
-                <p>El nacimiento de la leyenda de Pelé con tan solo 17 años y la primera estrella para Brasil.</p>
-                <a href="../HTML/worldcup-details.html?year=1958" class="btn-ver">Ver más</a>
-            </div>
-        </div>
-
-        <div class="mundial-card">
-            <img src="https://flagcdn.com/w640/ch.png" alt="bandera de suiza" class="mundial-foto">
-            <div class="card-content">
-                <h3>MUNDIAL 1954 - SUIZA</h3>
-                <p>El "Milagro de Berna": la sorpresiva victoria de Alemania Federal ante la mítica Hungría.</p>
-                <a href="../HTML/worldcup-details.html?year=1954" class="btn-ver">Ver más</a>
-            </div>
-        </div>
-
-        <div class="mundial-card">
-            <img src="https://flagcdn.com/w640/br.png" alt="bandera de brasil" class="mundial-foto">
-            <div class="card-content">
-                <h3>MUNDIAL 1950 - BRASIL</h3>
-                <p>El histórico e inolvidable "Maracanazo", donde Uruguay sorprendió al mundo entero.</p>
-                <a href="../HTML/worldcup-details.html?year=1950" class="btn-ver">Ver más</a>
-            </div>
-        </div>
-
-        <div class="mundial-card">
-            <img src="https://flagcdn.com/w640/fr.png" alt="bandera de francia" class="mundial-foto">
-            <div class="card-content">
-                <h3>MUNDIAL 1938 - FRANCIA</h3>
-                <p>El último torneo antes de la Segunda Guerra Mundial; Italia logra el histórico bicampeonato.</p>
-                <a href="../HTML/worldcup-details.html?year=1938" class="btn-ver">Ver más</a>
-            </div>
-        </div>
-
-        <div class="mundial-card">
-            <img src="https://flagcdn.com/w640/it.png" alt="bandera de italia" class="mundial-foto">
-            <div class="card-content">
-                <h3>MUNDIAL 1934 - ITALIA</h3>
-                <p>El primer mundial disputado en Europa, marcado por el tenso contexto político de la época.</p>
-                <a href="../HTML/worldcup-details.html?year=1934" class="btn-ver">Ver más</a>
-            </div>
-        </div>
-
-        <div class="mundial-card">
-            <img src="https://flagcdn.com/w640/uy.png" alt="bandera de uruguay" class="mundial-foto">
-            <div class="card-content">
-                <h3>MUNDIAL 1930 - URUGUAY</h3>
-                <p>El primer torneo mundialista de la historia, ganado por la selección anfitriona.</p>
-                <a href="../HTML/worldcup-details.html?year=1930" class="btn-ver">Ver más</a>
-            </div>
-        </div>
-
-    </main>
+    loadWorldCups();
+</script>
+<script src="search.js"></script>
 </body>
 </html>

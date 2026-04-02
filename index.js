@@ -2,7 +2,6 @@ import express from 'express';
 import cors from 'cors';
 import sequelize from './database.js';
 
-// Importación EXCLUSIVA de Rutas desde tu carpeta JAVA (Los meseros)
 import usersRoutes from './JAVA/users.js';
 import userTypesRoutes from './JAVA/userTypes.js';
 import friendshipsRoutes from './JAVA/friendships.js';

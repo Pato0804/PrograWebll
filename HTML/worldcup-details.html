@@ -37,8 +37,8 @@
         <section class="publish-section">
             <div class="publish-card">
                 <div class="user-info">
-                    <img src="https://via.placeholder.com/40" alt="Avatar">
-                    <strong>¿Qué te pareció este mundial?</strong>
+                <img src="https://ui-avatars.com/api/?name=Usuario&background=1B365D&color=fff&rounded=true" alt="Avatar">
+                <strong>¿Qué te pareció este mundial?</strong>
                 </div>
                 <textarea placeholder="Escribe tu opinión"></textarea>
                 <div class="publish-footer">
@@ -77,42 +77,42 @@
         <a href="../HTML/history.html" class="back-link">Volver al Historial</a>
     </div>
 
-    <script>
-        const parametrosURL = new URLSearchParams(window.location.search);
-        const añoSeleccionado = parametrosURL.get('year');
+<script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const selectedYear = urlParams.get('year');
 
-        function mostrarError() {
-            document.getElementById('badge-sede').style.display = 'none';
-            document.getElementById('titulo-mundial').innerText = "Mundial no encontrado";
-            document.getElementById('resumen-mundial').innerText = "La información de este mundial aún no está en la base de datos.";
-        }
+    function showError() {
+        document.getElementById('badge-sede').style.display = 'none';
+        document.getElementById('titulo-mundial').innerText = "World Cup not found";
+        document.getElementById('resumen-mundial').innerText = "The information for this world cup is not in the database yet.";
+    }
 
-        if (añoSeleccionado) {
-            fetch(`http://localhost:3000/world-cups/buscar/${añoSeleccionado}`)
-                .then(respuesta => respuesta.json())
-                .then(datos => {
-                    if (datos.error) {
-                        mostrarError();
-                    } else {
-                        document.getElementById('badge-sede').innerText = `Sede: ${datos.sede}`;
-                        document.getElementById('titulo-mundial').innerText = datos.nombre;
-                        document.getElementById('resumen-mundial').innerText = datos.descripcion;
-                        
-                        // Cambiar fondo si hay imagen en la BD
-                        if (datos.imagen_url) {
-                            const hero = document.getElementById('hero-header');
-                            hero.style.backgroundImage = `linear-gradient(rgba(27, 54, 93, 0.9), rgba(27, 54, 93, 0.9)), url('${datos.imagen_url}')`;
-                        }
+    if (selectedYear) {
+
+        fetch(`http://localhost:3000/world-cups/buscar/${selectedYear}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    showError();
+                } else {
+                    document.getElementById('badge-sede').innerText = `Host: ${data.host}`;
+                    document.getElementById('titulo-mundial').innerText = data.name;
+                    document.getElementById('resumen-mundial').innerText = data.description;
+                    
+                    if (data.image_url) {
+                        const hero = document.getElementById('hero-header');
+                        hero.style.backgroundImage = `linear-gradient(rgba(27, 54, 93, 0.9), rgba(27, 54, 93, 0.9)), url('${data.image_url}')`;
                     }
-                })
-                .catch(error => {
-                    console.error('Error de conexión:', error);
-                    mostrarError();
-                });
-        } else {
-            mostrarError();
-        }
-    </script>
+                }
+            })
+            .catch(error => {
+                console.error('Connection error:', error);
+                showError();
+            });
+    } else {
+        showError();
+    }
+</script>
 
 </body>
 </html>
