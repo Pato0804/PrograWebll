@@ -1,9 +1,10 @@
+/*
 -- phpMyAdmin SQL Dump
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Servidor: 127.0.0.1
--- Tiempo de generación: 28-03-2026 a las 17:51:30
+-- Servidor: 127.0.0.1:3307
+-- Tiempo de generación: 02-04-2026 a las 04:28:28
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -39,7 +40,8 @@ CREATE TABLE `categories` (
 
 INSERT INTO `categories` (`id_category`, `name`, `description`) VALUES
 (1, 'World Cup History', 'Posts related to FIFA World Cups'),
-(2, 'test', 'example');
+(2, 'Analysis', 'Tactical and statistical analysis'),
+(3, 'Memes', 'Humorous content');
 
 -- --------------------------------------------------------
 
@@ -187,6 +189,13 @@ CREATE TABLE `world_cups` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
+-- Volcado de datos para la tabla `world_cups`
+--
+
+INSERT INTO `world_cups` (`id_world_cup`, `name`, `date`, `host`, `image_url`, `description`) VALUES
+(1, 'World Cup 1986', '1986-05-31', 'México 🇲🇽', NULL, 'El torneo inolvidable de Diego Armando Maradona, la Mano de Dios y el Gol del Siglo.');
+
+--
 -- Índices para tablas volcadas
 --
 
@@ -272,7 +281,7 @@ ALTER TABLE `world_cups`
 -- AUTO_INCREMENT de la tabla `categories`
 --
 ALTER TABLE `categories`
-  MODIFY `id_category` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id_category` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT de la tabla `comments`
@@ -326,7 +335,7 @@ ALTER TABLE `user_types`
 -- AUTO_INCREMENT de la tabla `world_cups`
 --
 ALTER TABLE `world_cups`
-  MODIFY `id_world_cup` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id_world_cup` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- Restricciones para tablas volcadas
@@ -384,3 +393,5 @@ COMMIT;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+
+*/

@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalle </title>
+    <link rel="stylesheet" href="../CSS/navbar.css">
+    <link rel="stylesheet" href="../CSS/worldcup-details.css">
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-links">
+                <a href="../HTML/home.html">Inicio</a>
+                <a href="../HTML/explore.html">Explorar</a>
+                <a href="../HTML/profile.html">Perfil</a>
+                <a href="../HTML/history.html" class="active">Historial</a>
+            </div>
+            <div class="nav-search">
+                <input type="text" placeholder="Buscar...">
+                <button type="button">🔍</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-detalle">
+        
+        <header class="mundial-hero" id="hero-header">
+            <div class="hero-content">
+                <span class="badge" id="badge-sede">Sede: Cargando...</span>
+                <h1 id="titulo-mundial">MUNDIAL...</h1>
+                <p class="resumen" id="resumen-mundial">Cargando información del mundial...</p>
+            </div>
+        </header>
+
+        <section class="publish-section">
+            <div class="publish-card">
+                <div class="user-info">
+                    <img src="https://via.placeholder.com/40" alt="Avatar">
+                    <strong>¿Qué te pareció este mundial?</strong>
+                </div>
+                <textarea placeholder="Escribe tu opinión"></textarea>
+                <div class="publish-footer">
+                    <button class="btn-img">Foto</button>
+                    <button class="btn-post">Publicar Comentario</button>
+                </div>
+            </div>
+        </section>
+
+        <section class="comments-feed">
+            <h3>Lo que dice la comunidad</h3>
+
+            <div class="post-card">
+                <div class="post-header">
+                    <strong>@Pambolero_99</strong> • <span>Hace 2 días</span>
+                </div>
+                <p>La atajada del Dibu Martínez en el último minuto fue lo más cardíaco que he visto en mi vida. ¡Histórico!</p>
+                <div class="post-footer">
+                    <button>⚽ 125 Me Gusta</button>
+                    <button>💬 Comentar</button>
+                </div>
+            </div>
+
+            <div class="post-card">
+                <div class="post-header">
+                    <strong>@MundialistaFiel</strong> • <span>Hace 5 días</span>
+                </div>
+                <p>Extraño las canciones del mundial, la de Qatar no estaba mal pero ninguna supera a la de Sudáfrica 2010.</p>
+                <div class="post-footer">
+                    <button>⚽ 84 Me Gusta</button>
+                    <button>💬 Comentar</button>
+                </div>
+            </div>
+        </section>
+
+        <a href="../HTML/history.html" class="back-link">Volver al Historial</a>
+    </div>
+
+    <script>
+        const parametrosURL = new URLSearchParams(window.location.search);
+        const añoSeleccionado = parametrosURL.get('year');
+
+        function mostrarError() {
+            document.getElementById('badge-sede').style.display = 'none';
+            document.getElementById('titulo-mundial').innerText = "Mundial no encontrado";
+            document.getElementById('resumen-mundial').innerText = "La información de este mundial aún no está en la base de datos.";
+        }
+
+        if (añoSeleccionado) {
+            fetch(`http://localhost:3000/world-cups/buscar/${añoSeleccionado}`)
+                .then(respuesta => respuesta.json())
+                .then(datos => {
+                    if (datos.error) {
+                        mostrarError();
+                    } else {
+                        document.getElementById('badge-sede').innerText = `Sede: ${datos.sede}`;
+                        document.getElementById('titulo-mundial').innerText = datos.nombre;
+                        document.getElementById('resumen-mundial').innerText = datos.descripcion;
+                        
+                        // Cambiar fondo si hay imagen en la BD
+                        if (datos.imagen_url) {
+                            const hero = document.getElementById('hero-header');
+                            hero.style.backgroundImage = `linear-gradient(rgba(27, 54, 93, 0.9), rgba(27, 54, 93, 0.9)), url('${datos.imagen_url}')`;
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error de conexión:', error);
+                    mostrarError();
+                });
+        } else {
+            mostrarError();
+        }
+    </script>
+
+</body>
+</html>
