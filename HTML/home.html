@@ -3,42 +3,93 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MundInicio</title>
-    <link rel="stylesheet" href="../CSS/navbar.css">
-    <link rel="stylesheet" href="../CSS/home.css">
+    <title>MundiConnect - Inicio</title>
+    <style>
+        body { background-color: #F0F2F5; margin: 0; padding-top: 80px; font-family: Arial, sans-serif; }
+        .feed-container { max-width: 600px; margin: 0 auto; }
+        .post-card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .post-header { display: flex; align-items: center; margin-bottom: 10px; }
+        .post-avatar { width: 40px; height: 40px; border-radius: 50%; margin-right: 10px; background-color: #eee; }
+        .post-user-info h4 { margin: 0; color: #1B365D; }
+        .post-user-info small { color: #666; font-weight: bold; }
+        .post-title { font-size: 1.1em; font-weight: bold; margin-bottom: 5px; color: #333; }
+        .post-content { color: #444; line-height: 1.5; }
+    </style>
 </head>
 <body>
 
-    <nav class="navbar">
-        <div class="nav-container">
-            <div class="nav-links">
-                <a href="../HTML/home.html" class="active">Inicio</a>
-                <a href="../HTML/explore.html">Explorar</a>
-                <a href="../HTML/profile.html">Perfil</a>
-                <a href="../HTML/history.html">Historial</a>
-            </div>
-
-            <div class="nav-search">
-                <input type="text" placeholder="Buscar...">
-                <button type="button">🔍</button>
-            </div>
+    <nav style="background: #1B365D; color: white; display: flex; justify-content: space-around; padding: 15px; position: fixed; top: 0; width: 100%; z-index: 1000;">
+        <div>
+            <a href="home.html" style="color: #FFD700; text-decoration: none; font-weight: bold; margin-right: 15px;">Inicio</a>
+            <a href="explore.html" style="color: white; text-decoration: none; margin-right: 15px;">Explorar</a>
+            <a href="profile.html" style="color: white; text-decoration: none; margin-right: 15px;">Perfil</a>
+            <a href="history.html" style="color: white; text-decoration: none;">Historial</a>
+        </div>
+        <div>
+            <input type="text" placeholder="Buscar..." style="padding: 5px; border-radius: 5px; border: none;">
         </div>
     </nav>
 
-<!-- un ejemplillo sonso para que la pagina principal no se viera solona, btw preguntar-->
     <main class="feed-container">
-        <div class="post-card">
-            <div class="post-header">
-                <strong>@MessiFan2022</strong> • <span>Hace 2 horas</span>
-            </div>
-            <p>¿Se acuerdan de Qatar? El primer mundial en invierno, fue rarísimo pero esa final contra Francia no tuvo sentido. ¡Qué recuerdos!</p>
-            <div class="post-footer">
-                <button>⚽ Me gusta</button>
-                <button>💬 Comentar</button>
-            </div>
+        <h2 style="color: #1B365D; border-bottom: 2px solid #FFD700; padding-bottom: 10px;">Tu Muro de Novedades</h2>
+        <div id="feed-posts">
+            <p style="text-align: center; color: #666;">Cargando tu muro...</p>
         </div>
     </main>
 
-<script src="search.js"></script>
+    <script>
+        const loggedUserId = localStorage.getItem('userId');
+
+        if (!loggedUserId) {
+            window.location.href = 'login.html';
+        }
+
+        async function loadFeed() {
+            const feedContainer = document.getElementById('feed-posts');
+            try {
+                // Obtener a qué mundiales está suscrito el usuario
+                const resCups = await fetch('http://localhost:3000/worldcups');
+                const worldCups = await resCups.json();
+
+                // Luego, obtenemos los posts del feed del usuario (que incluye posts de los mundiales a los que está suscrito y sus propios posts)
+                const response = await fetch(`http://localhost:3000/posts/feed/${loggedUserId}`);
+                const posts = await response.json();
+                
+                feedContainer.innerHTML = ''; 
+
+                if (posts.length === 0) {
+                    feedContainer.innerHTML = '<p style="text-align: center; color: #666;">Tu muro está vacío. Sigue algún mundial en "Explorar" para ver actualizaciones.</p>';
+                    return;
+                }
+
+                posts.forEach(post => {
+                    // Buscamos el nombre del mundial asociado a este post usando el ID del mundial en el post y la lista de mundiales que cargamos al inicio
+                    const cupData = worldCups.find(c => c.id_world_cup === post.id_world_cup);
+                    const cupName = cupData ? cupData.name : 'Mundial General';
+
+                    const postHTML = `
+                        <div class="post-card">
+                            <div class="post-header">
+                                <img src="https://placehold.co/40x40/1B365D/FFFFFF?text=U" class="post-avatar">
+                                <div class="post-user-info">
+                                    <h4>Usuario ID: ${post.id_user}</h4>
+                                    <small style="color: #2D5A27;">📍 ${cupName}</small> <br>
+                                    <small style="font-weight: normal;">${new Date(post.created_at).toLocaleDateString()}</small>
+                                </div>
+                            </div>
+                            <div class="post-title">${post.title}</div>
+                            <div class="post-content">${post.content}</div>
+                        </div>
+                    `;
+                    feedContainer.innerHTML += postHTML;
+                });
+
+            } catch (error) {
+                feedContainer.innerHTML = '<p style="text-align: center; color: red;">Error al cargar el muro.</p>';
+            }
+        }
+
+        loadFeed();
+    </script>
 </body>
 </html>

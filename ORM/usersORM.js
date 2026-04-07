@@ -15,9 +15,9 @@ const User =sequelize.define("User",{
         type:DataTypes.DATEONLY,
         allowNull:false
     },
-    photo_url:{
-        type:DataTypes.TEXT,
-        allowNull:true
+    photo_url: {
+    type: DataTypes.TEXT('long'),
+    allowNull: true
     },
     gender:{
         type:DataTypes.ENUM("Masculino","Femenino"),

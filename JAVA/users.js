@@ -51,9 +51,23 @@ router.post('/login', async (req, res) => {
 });
 
 router.patch('/:id', async(req, res) => {
-    const users = await User.findByPk(req.params.id);
-    await users.update(req.body);
-    res.send(`Upgrades people, upgrades`);
+    try {
+        const user = await User.findByPk(req.params.id);
+        
+        if (!user) {
+            return res.status(404).send('Usuario no encontrado');
+        }
+
+        await user.update(req.body);
+        res.send('Upgrades people, upgrades');
+
+    } catch (error) {
+        console.error("ERROR EN EL BACKEND AL ACTUALIZAR:", error.message);
+        res.status(500).json({ 
+            error: 'Error interno del servidor', 
+            detalle: error.message 
+        });
+    }
 });
 
 router.delete('/:id', async(req, res) => {

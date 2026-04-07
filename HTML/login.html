@@ -46,7 +46,7 @@
         };
 
         try {
-            // 3. Hacer la petición al Backend (a nuestra nueva ruta /login)
+            //Hacer la petición al Backend
             const response = await fetch('http://localhost:3000/users/login', {
                 method: 'POST',
                 headers: {
@@ -57,23 +57,21 @@
 
             const data = await response.json();
 
-            // 4. Evaluar la respuesta
+  
             if (response.ok) {
-                alert('✅ ' + data.message);
+                alert('¡Bienvenido, ' + data.user.name + '!');
                 
-                // Opcional pero recomendado: Guardar el ID del usuario en el navegador 
-                // para saber quién está conectado en las demás páginas (Entrega 2/3)
                 localStorage.setItem('userId', data.user.id);
                 localStorage.setItem('userName', data.user.name);
 
                 // Redirigir a la página principal
                 window.location.href = 'home.html'; 
             } else {
-                alert('❌ Error: ' + data.error);
+                alert('Error: ' + data.error);
             }
         } catch (error) {
             console.error('Error de red:', error);
-            alert('🔌 Error al conectar con el servidor. ¿Está encendido Node.js?');
+            alert('Error al conectar con el servidor. ¿Está encendido Node.js?');
         }
     });
 </script>

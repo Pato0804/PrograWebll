@@ -3,60 +3,138 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Configuración de Perfil</title>
-    <link rel="stylesheet" href="../CSS/navbar.css">
-    <link rel="stylesheet" href="../CSS/edit-profile.css">
+    <title>MundiConnect - Editar Perfil</title>
+    <link rel="stylesheet" href="../CSS/login.css"> 
+    <style>
+        /* Un pequeño estilo extra para el botón de cancelar */
+        .btn-cancelar {
+            background-color: #dc3545;
+            margin-top: 10px;
+        }
+        .btn-cancelar:hover {
+            background-color: #c82333;
+        }
+    </style>
 </head>
 <body>
 
-    <nav class="navbar">
-        <div class="nav-container">
-            <div class="nav-links">
-                <a href="../HTML/home.html">Inicio</a>
-                <a href="../HTML/explore.html">Explorar</a>
-                <a href="../HTML/profile.html" class="active">Perfil</a>
-                <a href="../HTML/history.html">Historial</a>
+    <div class="login-card" style="max-height: 90vh; overflow-y: auto;">
+        <h1>Editar <span>Perfil</span></h1>
+        <p>Actualiza tu información mundialista</p>
+        
+        <form id="form-edit-profile">
+            <div class="input-group">
+                <label for="full_name" style="display: block; text-align: left; font-size: 0.85em; color: #666;">Nombre Completo</label>
+                <input type="text" id="full_name" required>
             </div>
-        </div>
-    </nav>
 
-    <div class="container-edit">
-        <div class="edit-card">
-            <h2>Configuración de la Cuenta</h2>
+            <div class="input-group">
+                <label for="country" style="display: block; text-align: left; font-size: 0.85em; color: #666;">País</label>
+                <input list="lista-paises" id="country" required style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; outline: none;">
+                <datalist id="lista-paises">
+                    <option value="Argentina"><option value="Brasil"><option value="Colombia">
+                    <option value="Chile"><option value="Ecuador"><option value="España">
+                    <option value="Estados Unidos"><option value="México"><option value="Perú">
+                    <option value="Uruguay"><option value="Venezuela">
+                </datalist>
+            </div>
 
-            <form>
-                <div class="section-title">Datos Personales</div>
-                <div class="photo-edit">
-                    <img src="https://via.placeholder.com/80" alt="Avatar">
-                    <div class="file-input">
-                        <label for="new-photo">Cambiar foto de perfil</label>
-                        <input type="file" id="new-photo" accept="image/*">
-                    </div>
-                </div>
+            <div class="input-group">
+                <label for="gender" style="display: block; text-align: left; font-size: 0.85em; color: #666;">Género</label>
+                <select id="gender" required style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; outline: none;">
+                    <option value="Masculino">Masculino</option>
+                    <option value="Femenino">Femenino</option>
+                    <option value="Otro">Otro</option>
+                </select>
+            </div>
 
-                <div class="form-grid">
-                    <input type="text" placeholder="Nombre completo" value="Nombre Actual">
-                    <input type="text" placeholder="País" value="México">
-                </div>
-                <input type="email" placeholder="Correo electrónico">
-
-                <div class="section-title">Seguridad</div>
-                <input type="password" placeholder="Contraseña actual (Obligatorio para cambios)" required>
-                
-                <div class="form-grid">
-                    <input type="password" placeholder="Nueva contraseña (Opcional)">
-                    <input type="password" placeholder="Confirmar nueva contraseña">
-                </div>
-
-                <div class="button-group">
-                    <button type="reset" class="btn-clear">Limpiar</button>
-                    <button type="submit" class="btn-save">Guardar Cambios</button>
-                </div>
-            </form>
+            <div class="input-group" style="text-align: left;">
+                <label for="photo_file" style="font-size: 0.85em; color: #666; margin-bottom: 5px; display: block;">Nueva Foto de Perfil (Opcional):</label>
+                <input type="file" id="photo_file" accept="image/png, image/jpeg, image/jpg" style="border: none; padding: 0;">
+                <small style="color: #999;">Deja esto en blanco si quieres conservar tu foto actual.</small>
+            </div>
             
-            <a href="../HTML/profile.html" class="back-link">Volver a mi perfil</a>
-        </div>
+            <p></p>
+            <button type="submit" class="btn-entrar">GUARDAR CAMBIOS</button>
+            <button type="button" class="btn-entrar btn-cancelar" onclick="window.location.href='profile.html'">CANCELAR</button>
+        </form>
     </div>
+    
+    <script>
+        // Script para manejar la edición del perfil
+        const loggedUserId = localStorage.getItem('userId');
 
+        if (!loggedUserId) {
+            window.location.href = 'login.html';
+        }
+
+        const fileToBase64 = (file) => {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = error => reject(error);
+            });
+        };
+
+        async function loadCurrentData() {
+            try {
+                const response = await fetch(`http://localhost:3000/users/${loggedUserId}`);
+                if (!response.ok) throw new Error('Could not load user data');
+                
+                const userData = await response.json();
+
+                // llenar el formulario con los datos actuales del usuario
+                document.getElementById('full_name').value = userData.full_name;
+                document.getElementById('country').value = userData.country || '';
+                document.getElementById('gender').value = userData.gender || 'Masculino';
+
+            } catch (error) {
+                console.error('Error loading data:', error);
+                alert('Hubo un problema cargando tu información.');
+            }
+        }
+
+        document.getElementById('form-edit-profile').addEventListener('submit', async (event) => {
+            event.preventDefault(); 
+
+            // Extraer los datos actualizados del formulario
+            const updatedData = {
+                full_name: document.getElementById('full_name').value,
+                country: document.getElementById('country').value,
+                gender: document.getElementById('gender').value
+            };
+
+            // Procesar la foto si se ha seleccionado una nueva
+            const photoInput = document.getElementById('photo_file');
+            if (photoInput.files.length > 0) {
+                updatedData.photo_url = await fileToBase64(photoInput.files[0]);
+            }
+
+            try {
+                //Petición PATCH al Backend para actualizar los datos del usuario
+                const response = await fetch(`http://localhost:3000/users/${loggedUserId}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(updatedData) 
+                });
+
+                if (response.ok) {
+                    alert('¡Perfil actualizado correctamente!');
+                    localStorage.setItem('userName', updatedData.full_name);
+                    window.location.href = 'profile.html'; 
+                } else {
+                    alert('Error al actualizar el perfil.');
+                }
+            } catch (error) {
+                console.error('Network error:', error);
+                alert('Error al conectar con el servidor.');
+            }
+        });
+
+        loadCurrentData();
+    </script>
 </body>
 </html>

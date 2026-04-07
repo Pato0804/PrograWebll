@@ -3,52 +3,158 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registro</title>
-    <link rel="stylesheet" href="../CSS/register.css">
+    <title>MundiConnect - Registro</title>
+    <link rel="stylesheet" href="../CSS/login.css"> 
 </head>
 <body>
 
-    <div class="login-card registro-card">
+    <div class="login-card" style="max-height: 90vh; overflow-y: auto;">
         <h1>Mundi<span>Connect</span></h1>
+        <p>¡Crea tu cuenta y únete a la afición!</p>
         
-        <form action="../HTML/login.html"> <input type="text" placeholder="Nombre completo" required>
-            
-            <div class="form-row">
-                <div class="input-group">
-                    <label>Fecha de nacimiento</label>
-                    <input type="date" required>
-                </div>
-                <div class="input-group">
-                    <label>Género</label>
-                    <select required>
-                        <option value="" disabled selected>Selecciona...</option>
-                        <option value="M">Masculino</option>
-                        <option value="F">Femenino</option>
-                        <option value="O">Otro / Prefiero no decirlo</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="form-row">
-                <input type="text" placeholder="País" required>
-                <input type="text" placeholder="Lugar de nacimiento" required>
-            </div>
-
-            <input type="email" placeholder="Correo electrónico" required>
-            <input type="password" placeholder="Crea una contraseña" required>
-
-            <div class="file-group">
-                <label for="foto">Selecciona tu foto de perfil:</label>
-                <input type="file" id="foto" accept="image/*">
+        <form id="form-registro">
+            <div class="input-group">
+                <input type="text" id="full_name" placeholder="Nombre Completo" required>
             </div>
             
-            <button type="submit" class="btn-entrar">CREAR CUENTA</button>
+            <div class="input-group">
+                <input type="date" id="birth_date" required title="Fecha de Nacimiento">
+            </div>
+
+            <div class="input-group">
+                <input list="CountryList" id="country" placeholder="Escribe o busca tu país..." required style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; outline: none;">
+                
+                <datalist id="CountryList">
+                    <option value="Argentina">
+                    <option value="Bolivia">
+                    <option value="Brasil">
+                    <option value="Canadá">
+                    <option value="Chile">
+                    <option value="Colombia">
+                    <option value="Costa Rica">
+                    <option value="Cuba">
+                    <option value="Ecuador">
+                    <option value="El Salvador">
+                    <option value="España">
+                    <option value="Estados Unidos">
+                    <option value="Guatemala">
+                    <option value="Honduras">
+                    <option value="México">
+                    <option value="Nicaragua">
+                    <option value="Panamá">
+                    <option value="Paraguay">
+                    <option value="Perú">
+                    <option value="Puerto Rico">
+                    <option value="República Dominicana">
+                    <option value="Uruguay">
+                    <option value="Venezuela">
+                    </datalist>
+            </div>
+
+            <div class="input-group">
+                <select id="gender" required style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; outline: none;">
+                    <option value="" disabled selected>Selecciona tu género</option>
+                    <option value="Masculino">Masculino</option>
+                    <option value="Femenino">Femenino</option>
+                    <option value="Otro">Otro</option>
+                </select>
+            </div>
+
+            <div class="input-group" style="text-align: left;">
+                <label for="photo_file" style="font-size: 0.85em; color: #666; margin-bottom: 5px; display: block;">Foto de Perfil (Opcional):</label>
+                <input type="file" id="photo_file" accept="image/png, image/jpeg, image/jpg" style="border: none; padding: 0;">
+            </div>
+            
+            <div class="input-group">
+                <input type="email" id="email" placeholder="Correo Electrónico" required>
+            </div>
+            
+            <div class="input-group">
+                <input type="password" id="password" placeholder="Contraseña" required>
+            </div>
+            
+            <p></p>
+            <button type="submit" class="btn-entrar">REGISTRARSE</button>
             
             <div class="links">
-                <a href="../HTML/login.html">¿Ya tienes cuenta? Inicia sesión</a>
+                <hr>
+                <a>¿Ya tienes cuenta?</a>
+                <a href="../HTML/login.html" class="btn-registro-link">INICIA SESIÓN</a>
             </div>
         </form>
     </div>
 
+    <script>
+            // Script para manejar el registro
+        const fileToBase64 = (file) => {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = error => reject(error);
+            });
+        };
+        //datos del DOM para el registro
+        document.getElementById('form-registro').addEventListener('submit', async (event) => {
+            event.preventDefault(); 
+
+            const full_name = document.getElementById('full_name').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const birth_date = document.getElementById('birth_date').value;
+            const country = document.getElementById('country').value;
+            const gender = document.getElementById('gender').value;
+
+            const photoInput = document.getElementById('photo_file');
+            let photo_url_base64 = ""; 
+            
+            if (photoInput.files.length > 0) {
+                photo_url_base64 = await fileToBase64(photoInput.files[0]);
+            }
+            //validaciones
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            const passRegex = /^(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$/; 
+
+            if (!emailRegex.test(email)) {
+                return alert("Por favor, ingresa un correo válido.");
+            }
+            if (!passRegex.test(password)) {
+                return alert("La contraseña debe tener al menos 8 caracteres, una mayúscula y un número.");
+            }
+            // Construimos el objeto del nuevo usuario
+            const newUser = {
+                full_name,
+                email,
+                password,
+                birth_date,
+                photo_url: photo_url_base64,
+                gender,
+                country,
+                id_user_type: 1 
+            };
+            // Enviamos la solicitud al backend
+            try {
+                const response = await fetch('http://localhost:3000/users', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(newUser) 
+                });
+
+                const textResponse = await response.text(); 
+
+                if (response.ok) {
+                    alert('¡Registro exitoso!');
+                    window.location.href = 'login.html'; 
+                } else {
+                    alert('Error en el registro: ' + textResponse);
+                }
+            } catch (error) {
+                console.error('Error de red:', error);
+                alert('Error al conectar con el servidor.');
+            }
+        });
+    </script>
 </body>
 </html>

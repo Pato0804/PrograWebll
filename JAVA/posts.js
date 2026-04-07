@@ -1,46 +1,73 @@
 import express from 'express';
+import { Op } from 'sequelize'; 
 import Post from '../ORM/postsORM.js';
+import Subscription from '../ORM/subscriptionsORM.js'; 
 
-const router =express.Router();
+const router = express.Router();
 
-router.get('/',async(req, res) => {
-    const posts= await Post.findAll();
-    res.json(posts);
+// Ruta para obtener el feed de publicaciones (GET)
+router.get('/feed/:userId', async (req, res) => {
+    try {
+        const userId = req.params.userId;
+        
+        // Primero, obtenemos los mundiales a los que el usuario está suscrito
+        const userSubs = await Subscription.findAll({
+            where: { id_user: userId }
+        });
+        
+        // Extraemos solo los IDs de esos mundiales
+        const subscribedWorldCupIds = userSubs.map(sub => sub.id_world_cup);
+
+        // Luego, buscamos los posts que sean del usuario o de los mundiales a los que está suscrito
+        const posts = await Post.findAll({
+            where: {
+                [Op.or]: [
+                    { id_user: userId }, // Posts hechos por el usuario
+                    { id_world_cup: { [Op.in]: subscribedWorldCupIds } } // Posts de mundiales que sigo
+                ]
+            },
+            order: [['created_at', 'DESC']] 
+        });
+
+        res.json(posts);
+    } catch (error) {
+        console.error("Error al generar el feed:", error);
+        res.status(500).json({ error: 'Error al cargar el muro' });
+    }
 });
 
-router.get('/:id',async(req, res) => {
-    const posts= await Post.findByPk(req.params.id);
-    res.json(posts);
+// ruta para crear un nuevo post (POST)
+router.post('/', async (req, res) => {
+    try {
+        const { title, content, id_user, id_world_cup, id_category } = req.body;
+        
+        const newPost = await Post.create({
+            title,
+            content,
+            id_user,
+            id_world_cup,
+            id_category
+        });
+        
+        res.status(200).send('Publicación creada con éxito');
+    } catch (error) {
+        console.error("Error al crear post:", error);
+        res.status(500).json({ error: 'No se pudo guardar la publicación' });
+    }
+
+    // Obtiene publicaciones de un mundial específico
+router.get('/worldcup/:worldCupId', async (req, res) => {
+    try {
+        const posts = await Post.findAll({
+            where: { id_world_cup: req.params.worldCupId },
+            order: [['created_at', 'DESC']]
+        });
+        res.json(posts);
+    } catch (error) {
+        res.status(500).json({ error: 'Error al obtener posts del mundial' });
+    }
 });
 
-router.post('/',async(req, res) => {
-    const {title,content,image_url,video_url,created_at,
-        approved_at,is_approved,
-        id_user,id_world_cup,id_category}=req.body;
-    const newPost=await Post.create({
-        title,content,image_url,video_url,created_at,
-        approved_at,is_approved,
-        id_user,id_world_cup,id_category
-    });
-    res.send(`Post  created successfully xd`);
-});
-
-
-router.patch('/:id',async(req, res) => {
-    const posts=await Post.findByPk(req.params.id);
-    await posts.update(req.body);
-
-    
-    res.send(`Upgrades people, 
-        upgrades`);
-});
-
-router.delete('/:id',async(req, res) => {
-    const posts=await Post.findByPk(req.params.id);
- 
-
-    await posts.destroy();
-    res.send(`Im not fellin good mr stark`);
 });
 
 export default router;

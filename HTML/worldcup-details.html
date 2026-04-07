@@ -2,117 +2,150 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Detalle </title>
-    <link rel="stylesheet" href="../CSS/navbar.css">
-    <link rel="stylesheet" href="../CSS/worldcup-details.css">
+    <title>Detalles del Mundial</title>
+    <style>
+        body { background-color: #F0F2F5; margin: 0; padding-top: 80px; font-family: Arial, sans-serif; }
+        .details-layout { max-width: 800px; margin: 0 auto; padding: 20px; }
+        .post-card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        
+        /* Estilos del formulario de publicación */
+        .create-post-box { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 30px; border-top: 4px solid #1B365D; }
+        .create-post-box input, .create-post-box textarea { width: 100%; box-sizing: border-box; padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 5px; outline: none; }
+        .create-post-box textarea { resize: none; height: 80px; }
+        .btn-publicar { background-color: #1B365D; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; width: 100%; transition: 0.3s; }
+        .btn-publicar:hover { background-color: #2a528c; }
+    </style>
 </head>
 <body>
 
-    <nav class="navbar">
-        <div class="nav-container">
-            <div class="nav-links">
-                <a href="../HTML/home.html">Inicio</a>
-                <a href="../HTML/explore.html">Explorar</a>
-                <a href="../HTML/profile.html">Perfil</a>
-                <a href="../HTML/history.html" class="active">Historial</a>
-            </div>
-            <div class="nav-search">
-                <input type="text" placeholder="Buscar...">
-                <button type="button">🔍</button>
-            </div>
+    <nav style="background: #1B365D; color: white; display: flex; justify-content: space-around; padding: 15px; position: fixed; top: 0; width: 100%; z-index: 1000;">
+        <div>
+            <a href="home.html" style="color: white; text-decoration: none; margin-right: 15px;">Inicio</a>
+            <a href="explore.html" style="color: white; text-decoration: none; margin-right: 15px;">Explorar</a>
+            <a href="profile.html" style="color: white; text-decoration: none; margin-right: 15px;">Perfil</a>
+            <a href="history.html" style="color: white; text-decoration: none;">Historial</a>
         </div>
     </nav>
 
-    <div class="container-detalle">
+    <main class="details-layout">
+        <div id="cup-header" class="post-card" style="text-align: center;">
+            <h1 id="cup-name" style="color: #1B365D; margin-top: 0;">Cargando...</h1>
+            <p id="cup-desc" style="color: #444;"></p>
+        </div>
+
+        <div class="create-post-box">
+            <h3 style="margin-top: 0; color: #1B365D;">Escribe tu memoria sobre este mundial</h3>
+            <form id="form-create-post">
+                <input type="text" id="post_title" placeholder="Ej. El mejor gol del torneo" required>
+                <textarea id="post_content" placeholder="Escribe tu opinión aquí..." required></textarea>
+                <button type="submit" class="btn-publicar">PUBLICAR EN ESTE MUNDIAL</button>
+            </form>
+        </div>
+
+        <h3 style="color: #1B365D; border-bottom: 2px solid #FFD700; padding-bottom: 10px;">Conversación de los Aficionados</h3>
         
-        <header class="mundial-hero" id="hero-header">
-            <div class="hero-content">
-                <span class="badge" id="badge-sede">Sede: Cargando...</span>
-                <h1 id="titulo-mundial">MUNDIAL...</h1>
-                <p class="resumen" id="resumen-mundial">Cargando información del mundial...</p>
-            </div>
-        </header>
+        <div id="cup-posts">
+            <p style="text-align: center; color: #666;">Cargando comentarios...</p>
+        </div>
+    </main>
 
-        <section class="publish-section">
-            <div class="publish-card">
-                <div class="user-info">
-                <img src="https://ui-avatars.com/api/?name=Usuario&background=1B365D&color=fff&rounded=true" alt="Avatar">
-                <strong>¿Qué te pareció este mundial?</strong>
-                </div>
-                <textarea placeholder="Escribe tu opinión"></textarea>
-                <div class="publish-footer">
-                    <button class="btn-img">Foto</button>
-                    <button class="btn-post">Publicar Comentario</button>
-                </div>
-            </div>
-        </section>
+    <script>
+        const loggedUserId = localStorage.getItem('userId');
+        const urlParams = new URLSearchParams(window.location.search);
+        const year = urlParams.get('year');
+        
+        // Variable global para guardar el ID del mundial actual
+        let currentWorldCupId = null;
 
-        <section class="comments-feed">
-            <h3>Lo que dice la comunidad</h3>
+        if (!loggedUserId) {
+            window.location.href = 'login.html';
+        }
 
-            <div class="post-card">
-                <div class="post-header">
-                    <strong>@Pambolero_99</strong> • <span>Hace 2 días</span>
-                </div>
-                <p>La atajada del Dibu Martínez en el último minuto fue lo más cardíaco que he visto en mi vida. ¡Histórico!</p>
-                <div class="post-footer">
-                    <button>⚽ 125 Me Gusta</button>
-                    <button>💬 Comentar</button>
-                </div>
-            </div>
+        async function loadDetails() {
+            try {
+                // Obtener la información del mundial por su año
+                const resCup = await fetch(`http://localhost:3000/world-cups/buscar/${year}`);
+                const cup = await resCup.json();
+                
+                // Guardamos el ID para usarlo cuando el usuario quiera publicar
+                currentWorldCupId = cup.id_world_cup;
 
-            <div class="post-card">
-                <div class="post-header">
-                    <strong>@MundialistaFiel</strong> • <span>Hace 5 días</span>
-                </div>
-                <p>Extraño las canciones del mundial, la de Qatar no estaba mal pero ninguna supera a la de Sudáfrica 2010.</p>
-                <div class="post-footer">
-                    <button>⚽ 84 Me Gusta</button>
-                    <button>💬 Comentar</button>
-                </div>
-            </div>
-        </section>
+                document.getElementById('cup-name').innerText = cup.name;
+                document.getElementById('cup-desc').innerText = cup.description;
 
-        <a href="../HTML/history.html" class="back-link">Volver al Historial</a>
-    </div>
+                // Traer las publicaciones que le pertenecen a este mundial
+                fetchPosts();
+            } catch (e) { 
+                console.error(e);
+                document.getElementById('cup-name').innerText = "Mundial no encontrado";
+            }
+        }
 
-<script>
-    const urlParams = new URLSearchParams(window.location.search);
-    const selectedYear = urlParams.get('year');
+        // Función separada para cargar las publicaciones
+        async function fetchPosts() {
+            if(!currentWorldCupId) return;
 
-    function showError() {
-        document.getElementById('badge-sede').style.display = 'none';
-        document.getElementById('titulo-mundial').innerText = "World Cup not found";
-        document.getElementById('resumen-mundial').innerText = "The information for this world cup is not in the database yet.";
-    }
+            try {
+                const resPosts = await fetch(`http://localhost:3000/posts/worldcup/${currentWorldCupId}`);
+                const posts = await resPosts.json();
+                
+                const container = document.getElementById('cup-posts');
+                container.innerHTML = posts.length ? '' : '<p style="text-align: center; color: #666;">Aún no hay comentarios sobre este mundial. ¡Sé el primero!</p>';
 
-    if (selectedYear) {
+                posts.forEach(post => {
+                    container.innerHTML += `
+                        <div class="post-card">
+                            <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                                <img src="https://placehold.co/40x40/1B365D/FFFFFF?text=U" style="border-radius: 50%; margin-right: 10px;">
+                                <div>
+                                    <h5 style="margin: 0; color: #1B365D;">Usuario ID: ${post.id_user}</h5>
+                                    <small style="color: #999;">${new Date(post.created_at).toLocaleDateString()}</small>
+                                </div>
+                            </div>
+                            <h4 style="margin: 0 0 5px 0; color: #333;">${post.title}</h4>
+                            <p style="color: #444; margin: 0; line-height: 1.5;">${post.content}</p>
+                        </div>
+                    `;
+                });
+            } catch (e) { console.error(e); }
+        }
 
-        fetch(`http://localhost:3000/world-cups/buscar/${selectedYear}`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.error) {
-                    showError();
+        // Lógica para Crear el Post
+        document.getElementById('form-create-post').addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            if(!currentWorldCupId) {
+                return alert("Espera a que cargue la información del mundial antes de publicar.");
+            }
+
+            const newPost = {
+                title: document.getElementById('post_title').value,
+                content: document.getElementById('post_content').value,
+                id_user: loggedUserId,
+                id_world_cup: currentWorldCupId, 
+                id_category: 1 
+            };
+
+            try {
+                const response = await fetch('http://localhost:3000/posts', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(newPost)
+                });
+
+                if (response.ok) {
+                    document.getElementById('post_title').value = '';
+                    document.getElementById('post_content').value = '';
+                    fetchPosts(); 
                 } else {
-                    document.getElementById('badge-sede').innerText = `Host: ${data.host}`;
-                    document.getElementById('titulo-mundial').innerText = data.name;
-                    document.getElementById('resumen-mundial').innerText = data.description;
-                    
-                    if (data.image_url) {
-                        const hero = document.getElementById('hero-header');
-                        hero.style.backgroundImage = `linear-gradient(rgba(27, 54, 93, 0.9), rgba(27, 54, 93, 0.9)), url('${data.image_url}')`;
-                    }
+                    alert("Error al intentar publicar.");
                 }
-            })
-            .catch(error => {
-                console.error('Connection error:', error);
-                showError();
-            });
-    } else {
-        showError();
-    }
-</script>
+            } catch (error) {
+                alert("Error de conexión con el servidor.");
+            }
+        });
 
+        loadDetails();
+    </script>
 </body>
 </html>

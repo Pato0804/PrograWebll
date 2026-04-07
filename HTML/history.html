@@ -45,49 +45,53 @@
 <main class="mundiales-grid" id="world-cups-container">
         </main>
 
-        <script>
-            
-    const worldCupsContainer = document.getElementById('world-cups-container');
-
+<script>
     async function loadWorldCups() {
+        const loggedUserId = localStorage.getItem('userId');
+        const container = document.getElementById('world-cups-container');
+
         try {
-            const response = await fetch('http://localhost:3000/world-cups');
-            
-            if (!response.ok) {
-                throw new Error('Error fetching world cups');
+            // Obtener mundiales a los que el usuario está suscrito
+            const resSubs = await fetch(`http://localhost:3000/subscriptions/user/${loggedUserId}`);
+            const subs = await resSubs.json();
+            const subscribedIds = subs.map(s => s.id_world_cup);
+
+            // Obtener todos los mundiales
+            const resCups = await fetch('http://localhost:3000/worldcups');
+            const allCups = await resCups.json();
+
+            // Filtrar solo los mundiales a los que el usuario está suscrito
+            const myCups = allCups.filter(cup => subscribedIds.includes(cup.id_world_cup));
+
+            container.innerHTML = '';
+
+            if (myCups.length === 0) {
+                container.innerHTML = `
+                    <div style="grid-column: 1/-1; text-align: center; padding: 40px;">
+                        <p>Aún no sigues ningún mundial.</p>
+                        <a href="explore.html" style="color: #1B365D; font-weight: bold;">¡Ve a explorar y sigue tus favoritos!</a>
+                    </div>`;
+                return;
             }
 
-            const worldCups = await response.json();
-
-            worldCupsContainer.innerHTML = '';
-
-            worldCups.forEach(worldCup => {
+            myCups.forEach(worldCup => {
+                const year = worldCup.date ? worldCup.date.split('-')[0] : 'Unknown';
                 const card = document.createElement('div');
                 card.className = 'mundial-card'; 
-
-                const displayImage = worldCup.image_url ? worldCup.image_url : `https://placehold.co/640x360/1B365D/FFFFFF?text=${worldCup.name}`;
-                const year = worldCup.date ? worldCup.date.split('-')[0] : 'Unknown';
-
                 card.innerHTML = `
-                    <img src="${displayImage}" alt="World Cup ${worldCup.name}" class="mundial-foto">
+                    <img src="${worldCup.image_url}" class="mundial-foto" onerror="this.src='https://placehold.co/640x360/1B365D/FFFFFF?text=${worldCup.name}'">
                     <div class="card-content">
-                        <h3>${worldCup.name.toUpperCase()} - ${worldCup.host ? worldCup.host.toUpperCase() : ''}</h3>
-                        <p>${worldCup.description || 'No description available.'}</p>
-                        
-                        <a href="../HTML/worldcup-details.html?year=${year}" class="btn-ver">View more</a>
+                        <h3>${worldCup.name.toUpperCase()}</h3>
+                        <p>${worldCup.description || 'Sin descripción.'}</p>
+                        <a href="../HTML/worldcup-details.html?year=${year}" class="btn-ver">Ver detalles y comentarios</a>
                     </div>
                 `;
-
-                worldCupsContainer.appendChild(card);
+                container.appendChild(card);
             });
 
-            if(worldCups.length === 0){
-                worldCupsContainer.innerHTML = '<p style="grid-column: 1 / -1; text-align: center;">No world cups registered yet.</p>';
-            }
-
         } catch (error) {
-            console.error('Error loading history:', error);
-            worldCupsContainer.innerHTML = '<p style="grid-column: 1 / -1; text-align: center; color: red;">Error connecting to the server.</p>';
+            console.error('Error:', error);
+            container.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: red;">Error al conectar con el servidor.</p>';
         }
     }
 

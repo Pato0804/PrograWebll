@@ -10,8 +10,7 @@ import commentsRoutes from './JAVA/comments.js';
 import notificationsRoutes from './JAVA/notifications.js';
 import postsRoutes from './JAVA/posts.js';
 import reactionsRoutes from './JAVA/reactions.js';
-import subscriptionsRoutes from './JAVA/subscriptions.js';
-
+import subscriptionRoutes from './JAVA/subscriptions.js';
 // Rutas de Mundiales
 import worldCupSearchRoutes from './JAVA/worldCupRoutes.js'; 
 import worldCupsRoutes from './JAVA/worldCups.js';
@@ -20,7 +19,8 @@ const app = express();
 const port = 3000;
 
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 console.log('Starting server...');
 console.log('Connecting to database...');
@@ -32,7 +32,7 @@ sequelize.authenticate()
 
 // Registro de Endpoints
 app.use('/world-cups', worldCupSearchRoutes); 
-app.use('/world-cups', worldCupsRoutes);
+app.use('/worldcups', worldCupsRoutes);
 app.use('/users', usersRoutes);
 app.use('/user-types', userTypesRoutes);
 app.use('/friendships', friendshipsRoutes);
@@ -41,7 +41,7 @@ app.use('/comments', commentsRoutes);
 app.use('/notifications', notificationsRoutes);
 app.use('/posts', postsRoutes);
 app.use('/reactions', reactionsRoutes);
-app.use('/subscriptions', subscriptionsRoutes);
+app.use('/subscriptions', subscriptionRoutes);
 
 app.get('/', (req, res) => {
     res.send('MundiConnect Backend is running smoothly!');

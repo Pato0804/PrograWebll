@@ -3,70 +3,160 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Explorar</title>
-    <link rel="stylesheet" href="../CSS/navbar.css">
-    <link rel="stylesheet" href="../CSS/explore.css">
+    <title>MundiConnect - Explorar Mundiales</title>
+    <style>
+        body { background-color: #F0F2F5; margin: 0; padding-top: 80px; font-family: Arial, sans-serif; }
+        .grid-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; padding: 20px; max-width: 1200px; margin: 0 auto; }
+        .world-cup-card { background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1); display: flex; flex-direction: column; }
+        .world-cup-img { width: 100%; height: 200px; object-fit: cover; }
+        .world-cup-info { padding: 20px; flex-grow: 1; display: flex; flex-direction: column; }
+        .world-cup-title { font-size: 1.5em; color: #1B365D; margin: 0 0 10px 0; }
+        .world-cup-host { font-weight: bold; color: #2D5A27; margin-bottom: 10px; }
+        .world-cup-desc { color: #666; margin-bottom: 20px; flex-grow: 1; }
+        .btn-subscribe { padding: 10px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; color: white; transition: 0.3s; width: 100%; }
+        .btn-blue { background-color: #1B365D; } /* Para Seguir */
+        .btn-blue:hover { background-color: #2a528c; }
+        .btn-red { background-color: #dc3545; } /* Para Dejar de seguir */
+        .btn-red:hover { background-color: #c82333; }
+    </style>
 </head>
 <body>
 
-    <nav class="navbar">
-        <div class="nav-container">
-            <div class="nav-links">
-                <a href="../HTML/home.html">Inicio</a>
-                <a href="../HTML/explore.html" class="active">Explorar</a>
-                <a href="../HTML/profile.html">Perfil</a>
-                <a href="../HTML/history.html">Historial</a>
-            </div>
-            <div class="nav-search">
-                <input type="text" placeholder="Buscar...">
-                <button type="button">🔍</button>
-            </div>
+    <nav style="background: #1B365D; color: white; display: flex; justify-content: space-around; padding: 15px; position: fixed; top: 0; width: 100%; z-index: 1000;">
+        <div>
+            <a href="home.html" style="color: white; text-decoration: none; margin-right: 15px;">Inicio</a>
+            <a href="explore.html" style="color: #FFD700; text-decoration: none; font-weight: bold; margin-right: 15px;">Explorar</a>
+            <a href="profile.html" style="color: white; text-decoration: none; margin-right: 15px;">Perfil</a>
+            <a href="history.html" style="color: white; text-decoration: none;">Historial</a>
+        </div>
+        <div>
+            <input type="text" placeholder="Buscar..." style="padding: 5px; border-radius: 5px; border: none;">
         </div>
     </nav>
 
-    <div class="filter-bar">
-        <div class="filter-container">
-            <div class="filter-item">
-                <label>Ordenar por:</label>
-                <select>
-                    <option>Más recientes</option>
-                    <option>Más antiguos</option>
-                    <option>Más populares (por goles(?))</option>
-                </select>
-            </div>
-
-            <div class="filter-item">
-                <label>Mundial Específico:</label>
-                <select>
-                    <option value="todos">Todos los Mundiales</option>
-                    <option value="2026">Canadá/USA/México 2026</option>
-                    <option value="2022">Qatar 2022</option>
-                    <option value="2018">Rusia 2018</option>
-                    <option value="2014">Brasil 2014</option>
-                    <option value="2010">Sudáfrica 2010</option>
-                    <option value="1986">México 1986 </option>
-                </select>
-            </div>
-            
-            <button class="btn-filtrar">Aplicar Filtro</button>
-        </div>
-    </div>
-
-<!-- otro ejemplo-->
-
-    <main class="feed-container">
-        <div class="post-card">
-            <div class="post-header">
-                <strong>@HistoriadorFutbol</strong> • <span>Mundial 1986</span>
-            </div>
-            <p>Dato curioso: El Estadio Azteca es el único que ha visto dos finales del mundo. ¡Increíble!</p>
-            <div class="post-footer">
-                <button>⚽ Me gusta</button>
-                <button>💬 Comentar</button>
-            </div>
-        </div>
+    <main class="grid-container" id="world-cups-grid">
+        <p style="text-align: center; grid-column: 1/-1;">Cargando catálogo de mundiales...</p>
     </main>
 
-<script src="search.js"></script>
+    <script>
+        const loggedUserId = localStorage.getItem('userId');
+
+        if (!loggedUserId) {
+            window.location.href = 'login.html';
+        }
+
+        let userSubscriptions = [];
+
+
+        async function initializePage() {
+            await loadSubscriptions();
+            await loadWorldCups();   
+        }
+
+        //Función para saber a qué estamos suscritos
+        async function loadSubscriptions() {
+            try {
+                const response = await fetch(`http://localhost:3000/subscriptions/user/${loggedUserId}`);
+                if (response.ok) {
+                    const subs = await response.json();
+                    // Extraemos solo los números
+                    userSubscriptions = subs.map(s => s.id_world_cup);
+                }
+            } catch (error) {
+                console.error("Error al cargar suscripciones", error);
+            }
+        }
+
+        //traer el cataglogo de la DB
+        async function loadWorldCups() {
+            const grid = document.getElementById('world-cups-grid');
+            
+            try {
+                // Asumo que tu ruta de mundiales es /worldcups (Ajusta esto si se llama diferente en tu JAVA/)
+                const response = await fetch('http://localhost:3000/worldcups');
+                const worldCups = await response.json();
+                
+                grid.innerHTML = ''; 
+
+                worldCups.forEach(cup => {
+                    // Verificamos si el usuario está suscrito a este mundial
+                    const isSubscribed = userSubscriptions.includes(cup.id_world_cup);
+                    
+                    // Definimos la clase y el texto del botón según el estado de suscripción
+                    const buttonClass = isSubscribed ? 'btn-red' : 'btn-blue';
+                    const buttonText = isSubscribed ? 'Dejar de Seguir' : 'Seguir Mundial';
+                    
+                    const cardHTML = `
+                        <div class="world-cup-card">
+                            <img src="${cup.image_url}" class="world-cup-img" alt="${cup.name}" onerror="this.src='https://placehold.co/600x400/1B365D/FFF?text=Foto'">
+                            <div class="world-cup-info">
+                                <h2 class="world-cup-title">${cup.name}</h2>
+                                <p class="world-cup-host">Sede: ${cup.host}</p>
+                                <p class="world-cup-desc">${cup.description}</p>
+                                
+                                <button 
+                                    class="btn-subscribe ${buttonClass}" 
+                                    onclick="toggleSubscription(${cup.id_world_cup}, this)">
+                                    ${buttonText}
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    grid.innerHTML += cardHTML;
+                });
+            } catch (error) {
+                grid.innerHTML = '<p style="color: red;">Error al cargar el catálogo. ¿Está encendido Node.js?</p>';
+            }
+        }
+
+        // Función para manejar la acción de seguir/dejar de seguir
+        async function toggleSubscription(worldCupId, buttonElement) {
+            buttonElement.disabled = true;
+            
+            const isCurrentlySubscribed = userSubscriptions.includes(worldCupId);
+            
+            try {
+                if (isCurrentlySubscribed) {
+                    // Acción: DEJAR DE SEGUIR (DELETE)
+                    const res = await fetch('http://localhost:3000/subscriptions', {
+                        method: 'DELETE',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ id_user: loggedUserId, id_world_cup: worldCupId })
+                    });
+                    
+                    if (res.ok) {
+
+                        userSubscriptions = userSubscriptions.filter(id => id !== worldCupId);
+
+                        buttonElement.className = 'btn-subscribe btn-blue';
+                        buttonElement.innerText = 'Seguir Mundial';
+                    }
+                } else {
+                    // Acción: SEGUIR (POST)
+                    const res = await fetch('http://localhost:3000/subscriptions', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ id_user: loggedUserId, id_world_cup: worldCupId })
+                    });
+
+                    if (res.ok) {
+                        
+                        userSubscriptions.push(worldCupId);
+                    
+                        buttonElement.className = 'btn-subscribe btn-red';
+                        buttonElement.innerText = 'Dejar de Seguir';
+                    }
+                }
+            } catch (error) {
+                alert('Error al procesar la solicitud.');
+            }
+            
+            // Volvemos a habilitar el botón después de la acción
+            buttonElement.disabled = false;
+        }
+
+
+        initializePage();
+    </script>
 </body>
 </html>
