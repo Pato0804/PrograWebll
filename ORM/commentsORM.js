@@ -22,10 +22,6 @@ const Comment =sequelize.define("Comment",{
     id_post:{
         type:DataTypes.INTEGER,
         allowNull:false
-    },
-    pais:{
-        type:DataTypes.BOOLEAN,
-        defaultValue:true
     }
     },{
         tableName:"comments",

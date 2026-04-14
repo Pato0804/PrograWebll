@@ -8,27 +8,71 @@ router.get('/',async(req, res) => {
     res.json(reactions);
 });
 
+router.get('/post/:postId/count', async (req, res) => {
+    const { postId } = req.params;
+
+    try {
+        const likes = await Reaction.count({
+            where: { id_post: postId, type: "like" }
+        });
+
+        const dislikes = await Reaction.count({
+            where: { id_post: postId, type: "dislike" }
+        });
+
+        res.json({ likes, dislikes });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Error contando reacciones" });
+    }
+});
+
 router.get('/:id',async(req, res) => {
     const reactions= await Reaction.findByPk(req.params.id);
     res.json(reactions);
 });
 
-router.post('/',async(req, res) => {
-    const {id_user,id_post,type,created_at}=req.body;
-    const newReaction=await Reaction.create({
-        id_user,id_post,type,created_at
-    });
-    res.send(`Reaction created successfully xd`);
-});
+router.post('/', async (req, res) => {
+    const { id_user, id_post, type } = req.body;
 
+    try {
+        const existing = await Reaction.findOne({
+            where: { id_user, id_post }
+        });
+
+        
+        if (!existing) {
+            const newReaction = await Reaction.create({
+                id_user,
+                id_post,
+                type
+            });
+            return res.json({ action: "created", reaction: newReaction });
+        }
+
+        
+        if (existing.type === type) {
+            await existing.destroy();
+            return res.json({ action: "deleted" });
+        }
+
+        
+        await existing.update({ type });
+        return res.json({ action: "updated", reaction: existing });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Error en reacción" });
+    }
+});
 
 router.patch('/:id',async(req, res) => {
     const reactions=await Reaction.findByPk(req.params.id);
     await reactions.update(req.body);
 
     
-    res.send(`Upgrades people, 
-        upgrades`);
+    res.json({ message: "updated" });
 });
 
 router.delete('/:id',async(req, res) => {
@@ -36,7 +80,7 @@ router.delete('/:id',async(req, res) => {
  
 
     await reactions.destroy();
-    res.send(`Im not fellin good mr stark`);
+    res.json({ message: "deleted" });
 });
 
 export default router;

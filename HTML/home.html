@@ -35,10 +35,183 @@
         <div id="feed-posts">
             <p style="text-align: center; color: #666;">Cargando tu muro...</p>
         </div>
+        <button onclick="openModal()" style="width:100%; padding:10px; margin-bottom:15px;">
+            Crear publicación
+        </button>
     </main>
 
-    <script>
-        const loggedUserId = localStorage.getItem('userId');
+    <script> 
+    async function loadReactions(postId){
+    try{
+        const res = await fetch(`http://localhost:3000/reactions/post/${postId}/count`);
+        const data = await res.json();
+
+        const container = document.getElementById(`reactions-${postId}`);
+
+        container.innerHTML = `
+            👍 ${data.likes} | 👎 ${data.dislikes}
+        `;
+
+    } catch (error){
+        console.error("Error cargando reacciones:", error);
+    }
+}
+
+    async function react(postId, type){
+    try{
+        const res = await fetch('http://localhost:3000/reactions', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                id_user: loggedUserId,
+                id_post: postId,
+                type
+            })
+        });
+
+        const data = await res.json();
+        console.log("REACTION:", data);
+
+        loadReactions(postId); 
+
+    } catch (error){
+        console.error("Error reaccionando:", error);
+    }
+}
+
+async function loadComments(postId){
+    const container = document.getElementById(`comments-${postId}`);
+
+    const res = await fetch(`http://localhost:3000/comments/post/${postId}`);
+    const comments = await res.json();
+
+    container.innerHTML = "";
+
+    comments.forEach(c => {
+
+        let actions = "";
+
+        if(c.id_user == loggedUserId){
+            actions = `
+                <button onclick="editComment(${c.id_comment}, '${c.content}', ${postId})">Editar</button>
+                <button onclick="deleteComment(${c.id_comment}, ${postId})">Eliminar</button>
+            `;
+        }
+
+        container.innerHTML += `
+            <div style="border-top:1px solid #ccc; margin-top:5px;">
+                <b>User ${c.id_user}</b>: ${c.content}
+                ${actions}
+            </div>
+        `;
+    });
+}
+
+async function createComment(postId){
+    const input = document.getElementById(`comment-input-${postId}`);
+    const content = input.value;
+
+
+        console.log("POST ID:", postId);
+console.log("USER ID:", loggedUserId);
+console.log("CONTENT:", content);
+    if(!content){
+        alert("Escribe algo");
+        return;
+    }
+
+    try {
+        const res = await fetch('http://localhost:3000/comments', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                content,
+                id_user: loggedUserId,
+                id_post: postId
+            })
+        });
+
+        const data = await res.json();
+        console.log("RESPUESTA:", data);
+
+        if(!res.ok){
+            alert(data.error || "Error al comentar");
+            return;
+        }
+
+        input.value = "";
+        loadComments(postId);
+
+    } catch (error) {
+        console.error("Error creando comentario:", error);
+    }
+
+}
+
+async function editComment(commentId, oldContent, postId){
+    const newContent = prompt("Editar comentario:", oldContent);
+
+    if(!newContent) return;
+
+    await fetch(`http://localhost:3000/comments/${commentId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            content: newContent,
+            id_user: loggedUserId
+        })
+    });
+
+    loadComments(postId); 
+}
+
+
+async function deleteComment(commentId, postId){
+    if(!confirm("Eliminar comentario?")) return;
+
+    await fetch(`http://localhost:3000/comments/${commentId}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            id_user: loggedUserId
+        })
+    });
+
+    loadComments(postId); 
+}
+
+
+        async function deletePost(postId){
+    if(!confirm("¿Seguro que quieres eliminar este post?")) return;
+
+    await fetch(`http://localhost:3000/posts/${postId}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id_user: loggedUserId })
+    });
+
+    loadFeed();
+}
+
+async function editPost(postId, oldTitle, oldContent){
+    const newTitle = prompt("Nuevo título:", oldTitle);
+    const newContent = prompt("Nuevo contenido:", oldContent);
+
+    if(!newTitle || !newContent) return;
+
+    await fetch(`http://localhost:3000/posts/${postId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            title: newTitle,
+            content: newContent,
+            id_user: loggedUserId
+        })
+    });
+
+    loadFeed();
+}
+        const loggedUserId = parseInt(localStorage.getItem('userId'));
 
         if (!loggedUserId) {
             window.location.href = 'login.html';
@@ -47,11 +220,11 @@
         async function loadFeed() {
             const feedContainer = document.getElementById('feed-posts');
             try {
-                // Obtener a qué mundiales está suscrito el usuario
+                
                 const resCups = await fetch('http://localhost:3000/worldcups');
                 const worldCups = await resCups.json();
 
-                // Luego, obtenemos los posts del feed del usuario (que incluye posts de los mundiales a los que está suscrito y sus propios posts)
+                
                 const response = await fetch(`http://localhost:3000/posts/feed/${loggedUserId}`);
                 const posts = await response.json();
                 
@@ -63,25 +236,102 @@
                 }
 
                 posts.forEach(post => {
-                    // Buscamos el nombre del mundial asociado a este post usando el ID del mundial en el post y la lista de mundiales que cargamos al inicio
+                    
                     const cupData = worldCups.find(c => c.id_world_cup === post.id_world_cup);
                     const cupName = cupData ? cupData.name : 'Mundial General';
 
-                    const postHTML = `
-                        <div class="post-card">
-                            <div class="post-header">
-                                <img src="https://placehold.co/40x40/1B365D/FFFFFF?text=U" class="post-avatar">
-                                <div class="post-user-info">
-                                    <h4>Usuario ID: ${post.id_user}</h4>
-                                    <small style="color: #2D5A27;">📍 ${cupName}</small> <br>
-                                    <small style="font-weight: normal;">${new Date(post.created_at).toLocaleDateString()}</small>
-                                </div>
-                            </div>
-                            <div class="post-title">${post.title}</div>
-                            <div class="post-content">${post.content}</div>
-                        </div>
+                    let mediaHTML = "";
+
+                
+                if(post.image_url){
+                    mediaHTML += `
+                        <img src="${post.image_url}" 
+                        style="width:100%; border-radius:10px; margin-top:10px;">
                     `;
+                }
+
+                
+                if(post.video_url){
+                    mediaHTML += `
+                        <video controls style="width:100%; border-radius:10px; margin-top:10px;">
+                            <source src="${post.video_url}">
+                            Tu navegador no soporta video
+                        </video>
+                    `;
+                }
+
+
+                let actionsHTML = "";
+
+                
+                if(post.id_user == loggedUserId){
+                    actionsHTML = `
+                        <button onclick="deletePost(${post.id_post})">Eliminar</button>
+                        <button onclick="editPost(${post.id_post}, '${post.title}', '${post.content}')">Editar</button>
+                    `;
+                }
+
+                const postHTML = `
+                    <div class="post-card">
+                        <div class="post-header">
+                            <img src="https://placehold.co/40x40/1B365D/FFFFFF?text=U" class="post-avatar">
+                            <div class="post-user-info">
+                                <h4>Usuario ID: ${post.id_user}</h4>
+                                <small style="color: #2D5A27;">📍 ${cupName}</small> <br>
+                                <small style="font-weight: normal;">${new Date(post.created_at).toLocaleDateString()}</small>
+                            </div>
+                            
+                        </div>
+
+                        <div class="post-title">${post.title}</div>
+                        <div class="post-content">${post.content}</div>
+
+                        ${mediaHTML}
+
+                        ${actionsHTML}
+                        <div>
+                            <input id="comment-input-${post.id_post}" placeholder="Escribe un comentario">
+                            <button class="comment-btn" data-post="${post.id_post}">Comentar</button>
+                        </div>
+                        <div id="comments-${post.id_post}">
+                            <p>Cargando comentarios...</p>
+                        </div>
+
+                        <div>
+                            <button class="like-btn" data-post="${post.id_post}">👍</button>
+    <button class="dislike-btn" data-post="${post.id_post}">👎</button>
+</div>
+
+<div id="reactions-${post.id_post}">
+    Cargando reacciones...
+</div>
+                        
+                        
+
+                    </div>
+                `;
                     feedContainer.innerHTML += postHTML;
+
+                    const btn = feedContainer.querySelector(`.comment-btn[data-post="${post.id_post}"]`);
+
+                    const likeBtn = feedContainer.querySelector(`.like-btn[data-post="${post.id_post}"]`);
+const dislikeBtn = feedContainer.querySelector(`.dislike-btn[data-post="${post.id_post}"]`);
+
+btn.addEventListener('click', () => {
+    console.log("CLICK DETECTADO", post.id_post);
+    createComment(post.id_post);
+});
+
+likeBtn.addEventListener('click', () => {
+    react(post.id_post, "like");
+});
+
+dislikeBtn.addEventListener('click', () => {
+    react(post.id_post, "dislike");
+});
+loadComments(post.id_post);
+loadReactions(post.id_post);
+
                 });
 
             } catch (error) {
@@ -90,6 +340,82 @@
         }
 
         loadFeed();
+
+        
+    function openModal(){
+    document.getElementById('postModal').style.display = 'block';
+}
+
+function closeModal(){
+    document.getElementById('postModal').style.display = 'none';
+}
+
+const fileToBase64 = (file) => {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = error => reject(error);
+    });
+};
+
+async function createPost(){
+    const title = document.getElementById('title').value;
+    const content = document.getElementById('content').value;
+    const mediaInput = document.getElementById('media');
+
+    let image_url = null;
+    let video_url = null;
+
+    if (mediaInput.files.length > 0){
+    const file = mediaInput.files[0];
+
+    if(file.type.startsWith("image")){
+        image_url = await fileToBase64(file);
+    } 
+    else if(file.type.startsWith("video")){
+        video_url = URL.createObjectURL(file); 
+    }
+}
+
+    const newPost = {
+        title,
+        content,
+        image_url,
+        video_url,
+        id_user: loggedUserId,
+        id_world_cup: 1, 
+        id_category: 1
+    };
+
+    const res = await fetch('http://localhost:3000/posts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newPost)
+    });
+    const textResponse = await res.text();
+    if(res.ok){
+        alert(textResponse); 
+        console.log(textResponse);
+        
+        closeModal();
+        loadFeed();
+    }
+}
     </script>
+    
+    <div id="postModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5);">
+    <div style="background:white; padding:20px; max-width:500px; margin:100px auto; border-radius:10px;">
+        <h3>Nueva publicación</h3>
+        <input id="title" placeholder="Título" style="width:100%; margin-bottom:10px;">
+        <textarea id="content" placeholder="¿Qué estás pensando?" style="width:100%; margin-bottom:10px;"></textarea>
+        
+        <input type="file" id="media">
+        
+        <br><br>
+        <button onclick="createPost()">Publicar</button>
+        <button onclick="closeModal()">Cancelar</button>
+    </div>
+</div>
 </body>
 </html>

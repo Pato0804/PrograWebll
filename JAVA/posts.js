@@ -39,23 +39,28 @@ router.get('/feed/:userId', async (req, res) => {
 // ruta para crear un nuevo post (POST)
 router.post('/', async (req, res) => {
     try {
-        const { title, content, id_user, id_world_cup, id_category } = req.body;
+        const { title, content, id_user, id_world_cup, id_category,image_url,
+            video_url } = req.body;
         
         const newPost = await Post.create({
             title,
             content,
             id_user,
             id_world_cup,
-            id_category
+            id_category,image_url,
+            video_url
         });
         
-        res.status(200).send('Publicación creada con éxito');
+        res.status(200).send('Post created succesfully boi');
     } catch (error) {
         console.error("Error al crear post:", error);
         res.status(500).json({ error: 'No se pudo guardar la publicación' });
     }
 
-    // Obtiene publicaciones de un mundial específico
+ 
+
+});
+   
 router.get('/worldcup/:worldCupId', async (req, res) => {
     try {
         const posts = await Post.findAll({
@@ -68,6 +73,60 @@ router.get('/worldcup/:worldCupId', async (req, res) => {
     }
 });
 
+
+
+router.put('/:id', async (req, res) => {
+    try {
+        const postId = req.params.id;
+        const { title, content, id_user } = req.body;
+
+        const post = await Post.findByPk(postId);
+
+        if (!post) {
+            return res.status(404).json({ error: 'Post no encontrado' });
+        }
+
+        // 🔥 VALIDACIÓN IMPORTANTE
+        if (post.id_user != id_user) {
+            return res.status(403).json({ error: 'No tienes permiso para editar este post' });
+        }
+
+        await post.update({
+            title,
+            content
+        });
+
+        res.json({ message: 'Post actualizado correctamente' });
+
+    } catch (error) {
+        res.status(500).json({ error: 'Error al actualizar el post' });
+    }
 });
 
+
+
+router.delete('/:id', async (req, res) => {
+    try {
+        const postId = req.params.id;
+        const { id_user } = req.body;
+
+        const post = await Post.findByPk(postId);
+
+        if (!post) {
+            return res.status(404).json({ error: 'Post no encontrado' });
+        }
+
+        // 🔥 VALIDACIÓN
+        if (post.id_user != id_user) {
+            return res.status(403).json({ error: 'No tienes permiso para eliminar este post' });
+        }
+
+        await post.destroy();
+
+        res.json({ message: 'Post eliminado correctamente' });
+
+    } catch (error) {
+        res.status(500).json({ error: 'Error al eliminar el post' });
+    }
+});
 export default router;
