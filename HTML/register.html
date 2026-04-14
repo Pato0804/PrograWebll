@@ -145,7 +145,7 @@
                 const textResponse = await response.text(); 
 
                 if (response.ok) {
-                    alert('¡Registro exitoso!');
+                    alert(textResponse);
                     window.location.href = 'login.html'; 
                 } else {
                     alert('Error en el registro: ' + textResponse);

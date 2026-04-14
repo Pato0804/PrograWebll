@@ -39,17 +39,19 @@ router.get('/feed/:userId', async (req, res) => {
 // ruta para crear un nuevo post (POST)
 router.post('/', async (req, res) => {
     try {
-        const { title, content, id_user, id_world_cup, id_category } = req.body;
+        const { title, content, id_user, id_world_cup, id_category,image_url,
+            video_url } = req.body;
         
         const newPost = await Post.create({
             title,
             content,
             id_user,
             id_world_cup,
-            id_category
+            id_category,image_url,
+            video_url
         });
         
-        res.status(200).send('Publicación creada con éxito');
+        res.status(200).send('Post created succesfully boi');
     } catch (error) {
         console.error("Error al crear post:", error);
         res.status(500).json({ error: 'No se pudo guardar la publicación' });
