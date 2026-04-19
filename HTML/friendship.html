@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MundiAmistades</title>
+    <style>
+        body { background-color: #F0F2F5; margin: 0; padding-top: 80px; font-family: Arial, sans-serif; }
+        .feed-container { max-width: 600px; margin: 0 auto; }
+        .post-card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .post-header { display: flex; align-items: center; margin-bottom: 10px; }
+        .post-avatar { width: 40px; height: 40px; border-radius: 50%; margin-right: 10px; background-color: #eee; }
+        .post-user-info h4 { margin: 0; color: #1B365D; }
+        .post-user-info small { color: #666; font-weight: bold; }
+        .post-title { font-size: 1.1em; font-weight: bold; margin-bottom: 5px; color: #333; }
+        .post-content { color: #444; line-height: 1.5; }
+
+          .explore-container { 
+        max-width: 600px; 
+        margin: 20px auto; 
+        display: flex; 
+        flex-direction: column; 
+        align-items: center; 
+    }
+    
+    .user-card { 
+        background: white; 
+        padding: 20px; 
+        border-radius: 10px; 
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
+        margin-bottom: 15px; 
+        width: 100%; 
+        max-width: 500px; /* Esto hace que no se estiren demasiado */
+        display: flex; 
+        justify-content: space-between; 
+        align-items: center;
+    }
+    
+    #buscador { 
+        width: 100%; 
+        max-width: 500px; 
+        padding: 10px; 
+        margin-bottom: 20px; 
+        border: 1px solid #ddd; 
+        border-radius: 5px; 
+    }
+    </style>
+</head>
+<body>
+
+    <nav style="background: #1B365D; color: white; display: flex; justify-content: space-around; padding: 15px; position: fixed; top: 0; width: 100%; z-index: 1000;">
+        <div>
+            <a href="home.html" style="color: #FFD700; text-decoration: none; font-weight: bold; margin-right: 15px;">Inicio</a>
+            <a href="explore.html" style="color: white; text-decoration: none; margin-right: 15px;">Explorar</a>
+            <a href="profile.html" style="color: white; text-decoration: none; margin-right: 15px;">Perfil</a>
+            <a href="history.html" style="color: white; text-decoration: none; margin-right: 15px;">Historial</a>
+             <a href="friendship.html" style="color: white; text-decoration: none;">Personas</a>
+        </div>
+        <div>
+            <input type="text" placeholder="Buscar..." style="padding: 5px; border-radius: 5px; border: none;">
+        </div>
+    </nav>
+
+    <main class="explore-container">
+        <h2 style="color: #1B365D;">Explorar amistades</h2>
+        <input type="text" id="buscador" placeholder="Buscar...">
+        <div id="lista-usuarios"></div>
+    </main>
+
+    <script src="social.js"></script>
+</body>
+</html>
