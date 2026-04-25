@@ -86,7 +86,7 @@ router.put('/:id', async (req, res) => {
             return res.status(404).json({ error: 'Post no encontrado' });
         }
 
-        // 🔥 VALIDACIÓN IMPORTANTE
+        
         if (post.id_user != id_user) {
             return res.status(403).json({ error: 'No tienes permiso para editar este post' });
         }
@@ -116,7 +116,7 @@ router.delete('/:id', async (req, res) => {
             return res.status(404).json({ error: 'Post no encontrado' });
         }
 
-        // 🔥 VALIDACIÓN
+        
         if (post.id_user != id_user) {
             return res.status(403).json({ error: 'No tienes permiso para eliminar este post' });
         }
