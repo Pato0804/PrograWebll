@@ -1,61 +1,191 @@
-MUNDICONNECT
-Integrantes del equipo
+# MUNDICONNECT
 
-200416 – Patricio Arturo González Guzmán
+## Integrantes del equipo
 
-1975336 – Ricardo Linares Renedo
+* **200416** – Patricio Arturo González Guzmán
+* **1975336** – Ricardo Linares Renedo
+* **1802856** – Aldo Andrés Plascencia García
+* **1900171** – Magdala Shania Quiroz González
 
-1802856 – Aldo Andrés Plascencia García
+---
 
-1900171 – Magdala Shania Quiroz González 
+## Descripción de la aplicación
 
-Diseño tecnico1
+**MUNDICONNECT** es una red social enfocada en los aficionados del fútbol, especialmente en la experiencia de los mundiales.
 
-Descripción de la aplicación
+La plataforma permite a los usuarios:
 
-MUNDICONNECT es una red social enfocada en los aficionados del fútbol y especialmente en la experiencia del Mundial. La plataforma permite que los usuarios puedan registrarse, iniciar sesión, compartir publicaciones y comentar sobre diferentes eventos relacionados con los mundiales de fútbol. 
+* Registrarse e iniciar sesión.
+* Explorar mundiales disponibles.
+* Suscribirse a mundiales de interés.
+* Crear publicaciones con texto, imágenes y video.
+* Editar y eliminar sus publicaciones.
+* Comentar publicaciones.
+* Editar y eliminar comentarios propios.
+* Reaccionar a publicaciones mediante likes y dislikes.
+* Consultar historial de mundiales.
+* Visualizar su perfil de usuario.
 
-Diseño tecnico1
+El objetivo de la aplicación es ofrecer un espacio digital donde los aficionados puedan interactuar, compartir opiniones y seguir eventos históricos y actuales del fútbol mundial.
 
-Además, el sistema incluye una sección de historial de mundiales, donde los usuarios pueden consultar información sobre torneos pasados y participar en conversaciones con otros usuarios sobre dichos eventos.
+---
 
-El objetivo de la aplicación es crear un espacio digital donde los aficionados puedan interactuar, compartir opiniones y vivir el Mundial de forma más social.
+## Tecnologías utilizadas
 
-Tecnologías utilizadas:
+### Backend
 
-Node.js – Entorno de ejecución del backend
+* Node.js — Entorno de ejecución
+* Express — Framework para servidor y rutas
+* Sequelize — ORM para conexión con base de datos
+* MySQL — Sistema gestor de base de datos
 
-Express – Framework para manejo de rutas del servidor
+### Frontend
 
-Sequelize – ORM para la comunicación con la base de datos
+* HTML5
+* CSS3
+* JavaScript (Vanilla JS)
 
-MySQL – Sistema de gestión de base de datos
+---
 
-Descripción de carpetas
+## Estructura del proyecto
 
-/ORM:
-Contiene los modelos de Sequelize que representan las tablas de la base de datos, como el modelo de usuarios.
+### `/ORM`
 
-usuarios.js,tipo_usuarios.js,amistades.js,categorias.js,comentarios.js,mundiales.js,notificaciones.js,publicaciones.js,reacciones.js y suscripciones_mundiales.js (routers):
-Archivos donde se implementa el CRUD de los modelos ORM, permitiendo crear, consultar, actualizar y eliminar registros.
+Contiene los modelos de Sequelize que representan las tablas del sistema:
 
-database.js:
-Archivo encargado de configurar la conexión entre el backend y la base de datos MySQL.
+* usuarios
+* tipo_usuarios
+* amistades
+* categorias
+* comentarios
+* mundiales
+* notificaciones
+* publicaciones
+* reacciones
+* suscripciones_mundiales
 
-index.js:
-Archivo principal del servidor. Inicializa Express, conecta la base de datos y registra las rutas de la aplicación.
+---
 
+### `/routes`
 
-En este primer avance se ha implementado:
+Contiene la lógica CRUD y endpoints del backend:
 
-Estructura inicial del backend
+* usuarios.js
+* tipo_usuarios.js
+* amistades.js
+* categorias.js
+* comentarios.js
+* mundiales.js
+* notificaciones.js
+* publicaciones.js
+* reacciones.js
+* suscripciones_mundiales.js
 
-Conexión con base de datos MySQL
+---
 
-Implementación de Sequelize como ORM
+### `/HTML`
 
-Modelo de usuarios
+Contiene las pantallas principales del sistema:
 
-CRUD básico de usuarios
+* **login.html** → Inicio de sesión
+* **register.html** → Registro de usuario
+* **home.html** → Feed principal de publicaciones
+* **explore.html** → Exploración y suscripción a mundiales
+* **profile.html** → Perfil de usuario
+* **history.html** → Historial de mundiales
 
-Este avance representa la base funcional del backend del sistema.
+---
+
+### Archivos principales
+
+**database.js**
+Configuración de conexión con MySQL.
+
+**index.js**
+Archivo principal del servidor. Configura Express, middlewares y rutas.
+
+---
+
+## Funcionalidades implementadas
+
+### Usuarios
+
+* Registro de usuario
+* Inicio de sesión
+* Persistencia de sesión con LocalStorage
+
+### Publicaciones
+
+* Crear publicación
+* Editar publicación
+* Eliminar publicación
+* Visualización en feed
+* Soporte para imágenes
+* Soporte para videos
+
+### Comentarios
+
+* Crear comentarios
+* Editar comentarios
+* Eliminar comentarios
+* Mostrar comentarios por publicación
+
+### Reacciones
+
+* Like a publicaciones
+* Dislike a publicaciones
+* Cambio de reacción
+* Eliminación de reacción al repetir selección
+* Conteo de likes/dislikes por publicación
+
+### Mundiales
+
+* Consulta de mundiales
+* Suscripción a mundiales
+* Historial de mundiales
+
+### Navegación
+
+* Barra de navegación funcional entre pantallas
+* Acceso mediante rutas definidas
+
+---
+
+## Rutas principales del sistema
+
+### Frontend
+
+* /login.html
+* /register.html
+* /home.html
+* /explore.html
+* /profile.html
+* /history.html
+
+### Backend API
+
+* /users
+* /posts
+* /comments
+* /reactions
+* /worldcups
+* /subscriptions
+
+---
+
+## Estado actual del proyecto
+
+En este segundo avance se ha implementado:
+
+* Backend funcional con Express y Sequelize
+* Base de datos conectada a MySQL
+* CRUD de usuarios
+* CRUD de publicaciones
+* CRUD de comentarios
+* Sistema de reacciones
+* Pantallas maquetadas y funcionales
+* Navegación entre pantallas
+* Integración frontend-backend
+* Feed dinámico conectado a base de datos
+
+Este avance representa una versión funcional de la aplicación con interacción completa entre usuarios, publicaciones y mundiales.
