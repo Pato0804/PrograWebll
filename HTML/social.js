@@ -37,14 +37,15 @@ async function cargarListaDeUsuarios() {
 //enviar soli
 async function enviarSolicitud(idAmigo, botonElemento) {
     const miId = localStorage.getItem('userId');
-    
+    const miNombre = "Alguien";
+
     if (!miId) {
         alert("Primero debes iniciar sesión");
         return;
     }
 
     try {
-        const response = await fetch('http://localhost:3000/friendships', {
+        const responseAmistad = await fetch('http://localhost:3000/friendships', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -55,7 +56,17 @@ async function enviarSolicitud(idAmigo, botonElemento) {
             })
         });
 
-        if (response.ok) {
+        if (responseAmistad.ok) {
+            await fetch('http://localhost:3000/notifications', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    id_user: idAmigo,
+                    message: `Has recibido una nueva solicitud de amistad`,
+                    type: 'friend',
+                    is_read: false
+                })
+            });
             alert("¡Solicitud enviada con éxito!");
             botonElemento.disabled = true;
             botonElemento.textContent = "Solicitud enviada";
@@ -67,7 +78,6 @@ async function enviarSolicitud(idAmigo, botonElemento) {
         console.error("Error de conexión:", error);
     }
 }
-
 //buscador
 const buscador = document.getElementById('buscador');
 if (buscador) {

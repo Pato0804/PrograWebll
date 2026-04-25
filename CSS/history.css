@@ -119,3 +119,10 @@ body {
 }
 
 .btn-ver:hover { text-decoration: underline; }
+
+.navbar {
+    z-index: 2000; 
+}
+.notifications-wrapper {
+    position: relative; 
+}

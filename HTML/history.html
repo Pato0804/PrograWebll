@@ -16,7 +16,22 @@
                 <a href="../HTML/explore.html">Explorar</a>
                 <a href="../HTML/profile.html">Perfil</a>
                 <a href="../HTML/history.html" class="active">Historial</a>
+          <!--NOTIFICACIONES AQUI LAS AGREGUE-->
+                <div class="notifications-container">
+            <button id="notif-bell" class="bell-btn">
+                🔔<span id="notif-count" class="badge" style="display:none;">0</span>
+            </button>
+            <div id="notif-dropdown" class="dropdown-content">
+                <div class="dropdown-header">Notificaciones</div>
+                <div id="notif-list">
+                    <p class="empty-msg">No hay Notificaciones Nuevas</p>
+                </div>
             </div>
+           </div>
+          <!---->            
+        
+        
+        </div>
             <div class="nav-search">
                 <input type="text" placeholder="Buscar...">
                 <button type="button">🔍</button>
@@ -96,6 +111,55 @@
     }
 
     loadWorldCups();
+    // Mostrar/Ocultar menú
+const bellBtn = document.getElementById('notif-bell');
+const dropdown = document.getElementById('notif-dropdown');
+
+bellBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+});
+
+// Cerrar al hacer clic fuera
+document.addEventListener('click', () => dropdown.style.display = 'none');
+//AQUI LE MOVI TAMBIEN!!! 
+async function fetchNotifications() {
+    const userId = localStorage.getItem('userId');
+    const list = document.getElementById('notif-list');
+    const badge = document.getElementById('notif-count');
+
+    try {
+        // CAMBIO AQUÍ: Ahora pedimos solo las notificaciones de ESTE usuario
+        const res = await fetch(`http://localhost:3000/notifications/user/${userId}`);
+        const myNotifs = await res.json();
+        
+        // Ya no necesitas el .filter(n => n.id_user == userId) aquí 
+        // porque el servidor ya hizo ese trabajo por ti.
+
+        const unread = myNotifs.filter(n => !n.is_read);
+
+        if (unread.length > 0) {
+            badge.innerText = unread.length;
+            badge.style.display = 'block';
+        }
+
+        if (myNotifs.length > 0) {
+            list.innerHTML = myNotifs.map(n => `
+                <div class="notif-item ${n.is_read ? '' : 'unread'}">
+                    <strong>${n.type.toUpperCase()}</strong>: ${n.message}
+                    <div style="font-size: 0.7rem; color: #999; margin-top: 5px;">
+                        ${new Date(n.created_at).toLocaleDateString()}
+                    </div>
+                </div>
+            `).join('');
+        }
+    } catch (err) {
+        console.error("Error al cargar notificaciones:", err);
+    }
+}
+/// AQUI TERMINA!!
+
+fetchNotifications();
 </script>
 <script src="search.js"></script>
 </body>

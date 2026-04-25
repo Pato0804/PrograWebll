@@ -7,18 +7,37 @@ router.get('/',async(req, res) => {
     const notifications= await Notification.findAll();
     res.json(notifications);
 });
-
+// jalaba todo, para eso es este, para que jale solo las notis del usuario
+router.get('/user/:id_user', async (req, res) => {
+    try {
+        const notifications = await Notification.findAll({
+            where: { id_user: req.params.id_user },
+            order: [['created_at', 'DESC']] 
+        });
+        res.json(notifications);
+    } catch (error) {
+        res.status(500).send("Error al obtener registros");
+    }
+});
 router.get('/:id',async(req, res) => {
     const notifications= await Notification.findByPk(req.params.id);
     res.json(notifications);
 });
 
-router.post('/',async(req, res) => {
-    const {id_user,message,type,is_read,created_at}=req.body;
-    const newNotificacion=await Notification.create({
-        id_user,message,type,is_read,created_at
-    });
-    res.send(`Notification created successfully xd`);
+router.post('/', async(req, res) => {
+    try {
+        const { id_user, message, type, is_read } = req.body; 
+        const newNotificacion = await Notification.create({
+            id_user, 
+            message, 
+            type, 
+            is_read: is_read || false
+        });
+        res.send(`Notification created successfully xd`);
+    } catch (error) {
+        console.error(error);
+        res.status(500).send("Error interno: " + error.message);
+    }
 });
 
 

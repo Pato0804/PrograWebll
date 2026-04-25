@@ -16,22 +16,24 @@ const Notification =sequelize.define("Notification",{
         allowNull:false
     },
     
-    type:{
-        type:DataTypes.ENUM("amistad","comentario","reaccion","sistema"),
-        allowNull:false
+ //(esta parte seguia en español XD)
+    type: {
+        type: DataTypes.ENUM("friend", "comment", "reaction", "system"),
+        allowNull: false
     },
-    is_read:{
-        type:DataTypes.BOOLEAN,
-        defaultValue:false
+    is_read: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false 
     },
-    created_at:{
-        type:DataTypes.DATE,
-        defaultValue:DataTypes.NOW
+//sigo sin saber por que esto no jalaba
+    created_at: {
+        type: DataTypes.DATE,
+        defaultValue: DataTypes.NOW,
+        field: 'created_at'
     }
-    },{
-        tableName:"notifications",
-        timestamps:false
-
+}, {
+    tableName: "notifications",
+    timestamps: false
 });
 
 export default Notification;
