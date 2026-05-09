@@ -2,8 +2,21 @@ import express from 'express';
 import { Op } from 'sequelize'; 
 import Post from '../ORM/postsORM.js';
 import Subscription from '../ORM/subscriptionsORM.js'; 
+import multer from 'multer';
+
 
 const router = express.Router();
+
+const storage = multer.diskStorage({
+    destination: (req, file, cb)=>{
+        cb(null, 'uploads/');
+    },
+    filename: (req, file, cb)=>{
+        cb(null, Date.now() + "-" + file.originalname);
+    }
+});
+
+const upload = multer({ storage });
 
 // Ruta para obtener el feed de publicaciones (GET)
 router.get('/feed/:userId', async (req, res) => {
@@ -37,28 +50,52 @@ router.get('/feed/:userId', async (req, res) => {
 });
 
 // ruta para crear un nuevo post (POST)
-router.post('/', async (req, res) => {
+router.post('/', upload.array('media', 10), async (req, res) => {
     try {
-        const { title, content, id_user, id_world_cup, id_category,image_url,
-            video_url } = req.body;
-        
-        const newPost = await Post.create({
+        const {
             title,
             content,
             id_user,
             id_world_cup,
-            id_category,image_url,
-            video_url
+            id_category
+        } = req.body;
+
+        let media_urls = [];
+
+        if(req.files && req.files.length > 0){
+
+            req.files.forEach(file=>{
+
+                const mediaType = file.mimetype.startsWith("image")
+                    ? "image"
+                    : "video";
+
+                media_urls.push({
+                    type: mediaType,
+                    url: `/uploads/${file.filename}`
+                });
+
+            });
+
+        }
+
+        await Post.create({
+            title,
+            content,
+            id_user,
+            id_world_cup,
+            id_category,
+            media_urls: JSON.stringify(media_urls)
         });
-        
-        res.status(200).send('Post created succesfully boi');
-    } catch (error) {
-        console.error("Error al crear post:", error);
-        res.status(500).json({ error: 'No se pudo guardar la publicación' });
+
+        res.status(200).send("Post creado");
+
+    } catch(error){
+        console.error(error);
+        res.status(500).json({
+            error:"No se pudo guardar"
+        });
     }
-
- 
-
 });
    
 router.get('/worldcup/:worldCupId', async (req, res) => {

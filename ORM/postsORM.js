@@ -16,14 +16,9 @@ const Post =sequelize.define("Post",{
         type:DataTypes.TEXT,
         allowNull:false
     },
-    image_url:{
-        type:DataTypes.TEXT,
-        
-    },
-    video_url:{
-        type:DataTypes.STRING,
-        
-    },
+media_urls:{
+    type:DataTypes.TEXT
+},
     created_at:{
         type:DataTypes.DATE,
         defaultValue:DataTypes.NOW

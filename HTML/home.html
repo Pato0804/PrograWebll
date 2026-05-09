@@ -245,22 +245,30 @@ async function editPost(postId, oldTitle, oldContent){
                     let mediaHTML = "";
 
                 
-                if(post.image_url){
-                    mediaHTML += `
-                        <img src="${post.image_url}" 
-                        style="width:100%; border-radius:10px; margin-top:10px;">
-                    `;
-                }
+                if(post.media_urls){
 
-                
-                if(post.video_url){
-                    mediaHTML += `
-                        <video controls style="width:100%; border-radius:10px; margin-top:10px;">
-                            <source src="${post.video_url}">
-                            Tu navegador no soporta video
-                        </video>
-                    `;
-                }
+    const mediaList = JSON.parse(post.media_urls);
+
+    mediaList.forEach(media=>{
+
+        if(media.type === "image"){
+            mediaHTML += `
+                <img src="http://localhost:3000${media.url}"
+                style="width:100%; border-radius:10px; margin-top:10px;">
+            `;
+        }
+
+        if(media.type === "video"){
+            mediaHTML += `
+                <video controls style="width:100%; border-radius:10px; margin-top:10px;">
+                    <source src="http://localhost:3000${media.url}">
+                </video>
+            `;
+        }
+
+    });
+
+}
 
 
                 let actionsHTML = "";
@@ -366,42 +374,36 @@ async function createPost(){
     const content = document.getElementById('content').value;
     const mediaInput = document.getElementById('media');
 
-    let image_url = null;
-    let video_url = null;
+    const formData = new FormData();
 
-    if (mediaInput.files.length > 0){
-    const file = mediaInput.files[0];
+    formData.append("title", title);
+    formData.append("content", content);
+    formData.append("id_user", loggedUserId);
+    formData.append("id_world_cup", 1);
+    formData.append("id_category", 1);
 
-    if(file.type.startsWith("image")){
-        image_url = await fileToBase64(file);
-    } 
-    else if(file.type.startsWith("video")){
-        video_url = URL.createObjectURL(file); 
+    for(let i = 0; i < mediaInput.files.length; i++){
+        formData.append("media", mediaInput.files[i]);
     }
-}
 
-    const newPost = {
-        title,
-        content,
-        image_url,
-        video_url,
-        id_user: loggedUserId,
-        id_world_cup: 1, 
-        id_category: 1
-    };
+    try{
+        const res = await fetch('http://localhost:3000/posts', {
+            method: 'POST',
+            body: formData
+        });
 
-    const res = await fetch('http://localhost:3000/posts', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newPost)
-    });
-    const textResponse = await res.text();
-    if(res.ok){
-        alert(textResponse); 
-        console.log(textResponse);
-        
-        closeModal();
-        loadFeed();
+        const textResponse = await res.text();
+
+        if(res.ok){
+            alert(textResponse);
+            closeModal();
+            loadFeed();
+        }else{
+            console.error(textResponse);
+        }
+
+    }catch(error){
+        console.error("Error creando post:", error);
     }
 }
     </script>
@@ -412,8 +414,7 @@ async function createPost(){
         <input id="title" placeholder="Título" style="width:100%; margin-bottom:10px;">
         <textarea id="content" placeholder="¿Qué estás pensando?" style="width:100%; margin-bottom:10px;"></textarea>
         
-        <input type="file" id="media">
-        
+<input type="file" id="media" multiple accept="image/*,video/*">        
         <br><br>
         <button onclick="createPost()">Publicar</button>
         <button onclick="closeModal()">Cancelar</button>
