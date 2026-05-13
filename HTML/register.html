@@ -93,68 +93,70 @@
                 reader.onload = () => resolve(reader.result);
                 reader.onerror = error => reject(error);
             });
+        
         };
+        
         //datos del DOM para el registro
-        document.getElementById('form-registro').addEventListener('submit', async (event) => {
-            event.preventDefault(); 
+document.getElementById('form-registro').addEventListener('submit', async (event) => {
+    event.preventDefault();
 
-            const full_name = document.getElementById('full_name').value;
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const birth_date = document.getElementById('birth_date').value;
-            const country = document.getElementById('country').value;
-            const gender = document.getElementById('gender').value;
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    const photoInput = document.getElementById('photo_file');
 
-            const photoInput = document.getElementById('photo_file');
-            let photo_url_base64 = ""; 
-            
-            if (photoInput.files.length > 0) {
-                photo_url_base64 = await fileToBase64(photoInput.files[0]);
-            }
-            //validaciones
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            const passRegex = /^(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$/; 
+    // 1. Validaciones de Texto (¡Restauradas!)
+    if (!email.includes('@')) {
+        return alert("Por favor, ingresa un correo electrónico válido.");
+    }
 
-            if (!emailRegex.test(email)) {
-                return alert("Por favor, ingresa un correo válido.");
-            }
-            if (!passRegex.test(password)) {
-                return alert("La contraseña debe tener al menos 8 caracteres, una mayúscula y un número.");
-            }
-            // Construimos el objeto del nuevo usuario
-            const newUser = {
-                full_name,
-                email,
-                password,
-                birth_date,
-                photo_url: photo_url_base64,
-                gender,
-                country,
-                id_user_type: 1 
-            };
-            // Enviamos la solicitud al backend
-            try {
-                const response = await fetch('http://localhost:3000/users', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(newUser) 
-                });
+    const passRegex = /^(?=.*[A-Z])(?=.*\d).{8,}$/;
+    if (!passRegex.test(password)) {
+        return alert("La contraseña debe tener al menos 8 caracteres, incluir una mayúscula y un número.");
+    }
 
-                const textResponse = await response.text(); 
+    //Validación de Imagen
+    if (photoInput && photoInput.files.length > 0) {
+        const file = photoInput.files[0];
+        if (!file.type.startsWith('image/')) {
+            return alert("El archivo seleccionado no es una imagen válida.");
+        }
+        if (file.size > 5 * 1024 * 1024) { // Límite de 5 MB
+            return alert("La imagen es demasiado grande. Por favor, elige una que pese menos de 5MB.");
+        }
+    }
 
-                if (response.ok) {
-                    alert(textResponse);
-                    window.location.href = 'login.html'; 
-                } else {
-                    alert('Error en el registro: ' + textResponse);
-                }
-            } catch (error) {
-                console.error('Error de red:', error);
-                alert('Error al conectar con el servidor.');
-            }
+    //Preparar FormData para el envío
+    const formData = new FormData();
+    formData.append('full_name', document.getElementById('full_name').value);
+    formData.append('email', email);
+    formData.append('password', password);
+    formData.append('birth_date', document.getElementById('birth_date').value);
+    formData.append('gender', document.getElementById('gender').value);
+    formData.append('country', document.getElementById('country').value);
+    formData.append('id_user_type', 1);
+
+    if (photoInput && photoInput.files.length > 0) {
+        formData.append('photo', photoInput.files[0]);
+    }
+
+    //Enviar al Servidor
+    try {
+        const response = await fetch('http://localhost:3000/users', {
+            method: 'POST',
+            body: formData 
         });
+
+        if (response.ok) {
+            alert('¡Registro exitoso! Ya puedes iniciar sesión.');
+            window.location.href = 'login.html'; 
+        } else {
+            const text = await response.text();
+            alert('Error en el registro: ' + text);
+        }
+    } catch (error) {
+        alert('Error al conectar con el servidor.');
+    }
+});
     </script>
 </body>
 </html>

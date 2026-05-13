@@ -61,80 +61,79 @@
     </div>
     
     <script>
-        // Script para manejar la edición del perfil
-        const loggedUserId = localStorage.getItem('userId');
 
-        if (!loggedUserId) {
-            window.location.href = 'login.html';
+// Script para manejar la edición del perfil
+const loggedUserId = localStorage.getItem('userId');
+
+// Cargar datos actuales
+async function loadCurrentData() {
+    try {
+        const response = await fetch(`http://localhost:3000/users/${loggedUserId}`);
+        const user = await response.json();
+        
+        document.getElementById('full_name').value = user.full_name;
+        document.getElementById('country').value = user.country;
+        
+        // Verifica si tienes el campo de género en la vista de edición
+        const genderSelect = document.getElementById('gender');
+        if(genderSelect) {
+            genderSelect.value = user.gender;
         }
+    } catch (error) {
+        console.error("Error al cargar datos:", error);
+    }
+}
 
-        const fileToBase64 = (file) => {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.readAsDataURL(file);
-                reader.onload = () => resolve(reader.result);
-                reader.onerror = error => reject(error);
-            });
-        };
+// Guardar cambios
+document.getElementById('form-edit-profile').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const photoInput = document.getElementById('photo_file');
 
-        async function loadCurrentData() {
-            try {
-                const response = await fetch(`http://localhost:3000/users/${loggedUserId}`);
-                if (!response.ok) throw new Error('Could not load user data');
-                
-                const userData = await response.json();
-
-                // llenar el formulario con los datos actuales del usuario
-                document.getElementById('full_name').value = userData.full_name;
-                document.getElementById('country').value = userData.country || '';
-                document.getElementById('gender').value = userData.gender || 'Masculino';
-
-            } catch (error) {
-                console.error('Error loading data:', error);
-                alert('Hubo un problema cargando tu información.');
-            }
+    // Validación de Imagen
+    if (photoInput && photoInput.files.length > 0) {
+        const file = photoInput.files[0];
+        if (!file.type.startsWith('image/')) {
+            return alert("El archivo seleccionado no es una imagen válida.");
         }
+        if (file.size > 5 * 1024 * 1024) { // Límite de 5 MB
+            return alert("La imagen es demasiado grande. Por favor, elige una que pese menos de 5MB.");
+        }
+    }
 
-        document.getElementById('form-edit-profile').addEventListener('submit', async (event) => {
-            event.preventDefault(); 
+    const formData = new FormData();
+    formData.append('full_name', document.getElementById('full_name').value);
+    formData.append('country', document.getElementById('country').value);
+    
+    const genderSelect = document.getElementById('gender');
+    if(genderSelect) {
+        formData.append('gender', genderSelect.value);
+    }
 
-            // Extraer los datos actualizados del formulario
-            const updatedData = {
-                full_name: document.getElementById('full_name').value,
-                country: document.getElementById('country').value,
-                gender: document.getElementById('gender').value
-            };
+    if (photoInput && photoInput.files.length > 0) {
+        formData.append('photo', photoInput.files[0]);
+    }
 
-            // Procesar la foto si se ha seleccionado una nueva
-            const photoInput = document.getElementById('photo_file');
-            if (photoInput.files.length > 0) {
-                updatedData.photo_url = await fileToBase64(photoInput.files[0]);
-            }
-
-            try {
-                //Petición PATCH al Backend para actualizar los datos del usuario
-                const response = await fetch(`http://localhost:3000/users/${loggedUserId}`, {
-                    method: 'PATCH',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(updatedData) 
-                });
-
-                if (response.ok) {
-                    alert('¡Perfil actualizado correctamente!');
-                    localStorage.setItem('userName', updatedData.full_name);
-                    window.location.href = 'profile.html'; 
-                } else {
-                    alert('Error al actualizar el perfil.');
-                }
-            } catch (error) {
-                console.error('Network error:', error);
-                alert('Error al conectar con el servidor.');
-            }
+    try {
+        const response = await fetch(`http://localhost:3000/users/${loggedUserId}`, {
+            method: 'PATCH',
+            body: formData
         });
 
-        loadCurrentData();
+        if (response.ok) {
+            alert('¡Perfil actualizado correctamente!');
+            localStorage.setItem('userName', document.getElementById('full_name').value);
+            window.location.href = 'profile.html';
+        } else {
+            alert('Hubo un error al actualizar el perfil.');
+        }
+    } catch (error) {
+        alert('Error al conectar con el servidor.');
+    }
+});
+
+loadCurrentData();
+
     </script>
 </body>
 </html>

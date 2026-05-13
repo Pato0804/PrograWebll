@@ -11,7 +11,6 @@ import notificationsRoutes from './JAVA/notifications.js';
 import postsRoutes from './JAVA/posts.js';
 import reactionsRoutes from './JAVA/reactions.js';
 import subscriptionRoutes from './JAVA/subscriptions.js';
-// Rutas de Mundiales
 import worldCupSearchRoutes from './JAVA/worldCupRoutes.js'; 
 import worldCupsRoutes from './JAVA/worldCups.js';
 
@@ -22,17 +21,16 @@ app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
+// LÍNEA CRÍTICA: Hace que la carpeta de fotos sea accesible desde el navegador
 app.use('/uploads', express.static('uploads'));
 
 console.log('Starting server...');
 console.log('Connecting to database...');
 
-// Verificación de conexión
 sequelize.authenticate()
     .then(() => console.log('Connected to MySQL with Sequelize (DB: webprog2)'))
     .catch(err => console.error('Error connecting to the database:', err));
 
-// Registro de Endpoints
 app.use('/world-cups', worldCupSearchRoutes); 
 app.use('/worldcups', worldCupsRoutes);
 app.use('/users', usersRoutes);
@@ -50,5 +48,5 @@ app.get('/', (req, res) => {
 });
 
 app.listen(port, () => {
-    console.log(`Server running at http://localhost:${port}`);
+    console.log(`Server is running on http://localhost:${port}`);
 });

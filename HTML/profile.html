@@ -58,47 +58,32 @@
     <script src="search.js"></script>
 
     <script>
-        const loggedUserId = localStorage.getItem('userId');
+ const loggedUserId = localStorage.getItem('userId');
 
-        if (!loggedUserId) {
-            window.location.href = 'login.html';
-        }
-        
-        // Función para cargar los datos del usuario y mostrar en el perfil
-        async function loadUserProfile() {
-            try {
-                const response = await fetch(`http://localhost:3000/users/${loggedUserId}`);
-                
-                if (!response.ok) {
-                    throw new Error('User not found');
-                }
+async function loadUserProfile() {
+    try {
+        const response = await fetch(`http://localhost:3000/users/${loggedUserId}`);
+        const userData = await response.json();
 
-                const userData = await response.json();
+        document.getElementById('user-name').innerText = userData.full_name;
+        document.getElementById('user-subtitle').innerText = `${userData.country || 'Sin país'} | ${userData.email}`;
 
-                document.getElementById('user-name').innerText = userData.full_name;
+        const profilePhoto = document.getElementById('user-photo');
+        let urlFoto = userData.photo_url;
 
-                const country = userData.country || 'Sin país';
-                document.getElementById('user-subtitle').innerText = `${country} | ${userData.email}`;
-
-                const profilePhoto = document.getElementById('user-photo');
-                let urlFoto = userData.photo_url;
-
-                // Si no hay foto en la BD se usan las iniciales
-                if (!urlFoto || urlFoto.trim() === "") {
-                
-                    const iniciales = userData.full_name.substring(0, 2).toUpperCase();
-                    urlFoto = `https://placehold.co/150x150/1B365D/FFFFFF?text=${iniciales}`;
-                }
-
-                profilePhoto.src = urlFoto;
-
-            } catch (error) {
-                console.error('Error loading profile:', error);
-                document.getElementById('user-name').innerText = "Error al cargar perfil";
-            }
+        // Si la foto es null, vacía o dice "null" como texto, ponemos el placeholder con las iniciales
+        if (!urlFoto || urlFoto === "null" || urlFoto === "") {
+            const iniciales = userData.full_name.substring(0, 2).toUpperCase();
+            urlFoto = `https://placehold.co/150x150/1B365D/FFFFFF?text=${iniciales}`;
         }
 
-        loadUserProfile();
+        profilePhoto.src = urlFoto;
+    } catch (error) {
+        console.error('Error loading profile:', error);
+    }
+}
+
+loadUserProfile();
     </script>
 
 </body>

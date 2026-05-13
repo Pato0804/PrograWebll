@@ -74,42 +74,40 @@
             const grid = document.getElementById('world-cups-grid');
             
             try {
-                // Asumo que tu ruta de mundiales es /worldcups (Ajusta esto si se llama diferente en tu JAVA/)
+            
                 const response = await fetch('http://localhost:3000/worldcups');
                 const worldCups = await response.json();
                 
                 grid.innerHTML = ''; 
 
-                worldCups.forEach(cup => {
-                    // Verificamos si el usuario está suscrito a este mundial
-                    const isSubscribed = userSubscriptions.includes(cup.id_world_cup);
-                    
-                    // Definimos la clase y el texto del botón según el estado de suscripción
-                    const buttonClass = isSubscribed ? 'btn-red' : 'btn-blue';
-                    const buttonText = isSubscribed ? 'Dejar de Seguir' : 'Seguir Mundial';
-                    
-                    const cardHTML = `
-                        <div class="world-cup-card">
-                            <img src="${cup.image_url}" class="world-cup-img" alt="${cup.name}" onerror="this.src='https://placehold.co/600x400/1B365D/FFF?text=Foto'">
-                            <div class="world-cup-info">
-                                <h2 class="world-cup-title">${cup.name}</h2>
-                                <p class="world-cup-host">Sede: ${cup.host}</p>
-                                <p class="world-cup-desc">${cup.description}</p>
-                                
-                                <button 
-                                    class="btn-subscribe ${buttonClass}" 
-                                    onclick="toggleSubscription(${cup.id_world_cup}, this)">
-                                    ${buttonText}
-                                </button>
-                            </div>
-                        </div>
-                    `;
-                    grid.innerHTML += cardHTML;
-                });
+worldCups.forEach(cup => {
+    // Detectar si está suscrito
+    const isSubscribed = userSubscriptions.includes(cup.id_world_cup);
+    const buttonClass = isSubscribed ? 'btn-red' : 'btn-blue';
+    const buttonText = isSubscribed ? 'Dejar de Seguir' : 'Seguir Mundial';
+    
+    // Si no hay imagen, usar un placeholder con el nombre del mundial
+    const imagenSegura = cup.image_url ? cup.image_url : `https://placehold.co/600x400/1B365D/FFFFFF?text=${cup.name}`;
+    
+    grid.innerHTML += `
+        <div class="world-cup-card">
+            <img src="${imagenSegura}" class="world-cup-img" onerror="this.src='https://placehold.co/600x400/1B365D/FFFFFF?text=Error'">
+            
+            <div class="world-cup-info">
+                <h2 class="world-cup-title">${cup.name}</h2>
+                <p class="world-cup-host">Sede: ${cup.host}</p>
+                <button class="btn-subscribe ${buttonClass}" 
+                        onclick="toggleSubscription(${cup.id_world_cup}, this)">
+                        ${buttonText}
+                </button>
+            </div>
+        </div>`;
+});
             } catch (error) {
                 grid.innerHTML = '<p style="color: red;">Error al cargar el catálogo. ¿Está encendido Node.js?</p>';
             }
         }
+
 
         // Función para manejar la acción de seguir/dejar de seguir
         async function toggleSubscription(worldCupId, buttonElement) {
