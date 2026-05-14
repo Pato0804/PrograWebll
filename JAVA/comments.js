@@ -1,7 +1,10 @@
 import express from 'express';
 import Comment from '../ORM/commentsORM.js';
+import User from '../ORM/usersORM.js';
 
 const router =express.Router();
+
+
 
 router.get('/',async(req, res) => {
     const comments= await Comment.findAll();
@@ -9,13 +12,17 @@ router.get('/',async(req, res) => {
 });
 
 
+//esta es la relación entre Comment y User para poder incluir los datos del usuario en las consultas de comentarios
+Comment.belongsTo(User, { foreignKey: 'id_user' });
+
 router.get('/post/:postId', async (req, res) => {
     try {
         const comments = await Comment.findAll({
             where: { id_post: req.params.postId },
+            //Incluimos los datos del usuario
+            include: [{ model: User, attributes: ['full_name', 'photo_url'] }],
             order: [['created_at', 'ASC']]
         });
-
         res.json(comments);
     } catch (error) {
         res.status(500).json({ error: 'Error al obtener comentarios' });

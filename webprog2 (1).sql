@@ -2,8 +2,8 @@
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Servidor: 127.0.0.1
--- Tiempo de generación: 09-05-2026 a las 22:06:51
+-- Servidor: 127.0.0.1:3307
+-- Tiempo de generación: 14-05-2026 a las 01:49:53
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -20,6 +20,8 @@ SET time_zone = "+00:00";
 --
 -- Base de datos: `webprog2`
 --
+CREATE DATABASE IF NOT EXISTS `webprog2` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+USE `webprog2`;
 
 -- --------------------------------------------------------
 
@@ -55,18 +57,6 @@ CREATE TABLE `comments` (
   `id_post` int(11) NOT NULL,
   `active` tinyint(1) DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Volcado de datos para la tabla `comments`
---
-
-INSERT INTO `comments` (`id_comment`, `content`, `created_at`, `id_user`, `id_post`, `active`) VALUES
-(13, 'aaaaaaa', '2026-04-18 14:47:39', 7, 57, 1),
-(14, 'ffffffffff', '2026-04-18 14:47:43', 7, 57, 1),
-(15, 'aaaaaaa', '2026-04-18 15:38:54', 7, 57, 1),
-(16, 'aaaaaaa2', '2026-04-18 15:40:03', 7, 57, 1),
-(17, 'aaaaaaasssss', '2026-04-18 16:33:40', 7, 57, 1),
-(18, 'prueba 2', '2026-05-09 18:52:40', 7, 57, 1);
 
 -- --------------------------------------------------------
 
@@ -116,17 +106,6 @@ CREATE TABLE `posts` (
   `media_urls` longtext DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Volcado de datos para la tabla `posts`
---
-
-INSERT INTO `posts` (`id_post`, `title`, `content`, `created_at`, `approved_at`, `is_approved`, `id_user`, `id_world_cup`, `id_category`, `media_urls`) VALUES
-(57, 'titulo 3', 'cont 3', '2026-04-18 14:47:04', NULL, 0, 7, 1, 1, NULL),
-(59, 'asdsada', 'sdadasd', '2026-05-07 22:48:27', NULL, 0, 7, 1, 1, NULL),
-(60, '2', '2', '2026-05-09 18:47:57', NULL, 0, 7, 1, 1, '[{\"type\":\"image\",\"url\":\"/uploads/1778352477305-60265239-cobblestones-floor-texture.jpg\"}]'),
-(61, '2', '2', '2026-05-09 18:48:12', NULL, 0, 7, 1, 1, '[{\"type\":\"video\",\"url\":\"/uploads/1778352492917-ATE_AAPG_A4.mp4\"}]'),
-(62, '2', '222', '2026-05-09 18:49:21', NULL, 0, 7, 1, 1, '[{\"type\":\"image\",\"url\":\"/uploads/1778352561847-60265239-cobblestones-floor-texture.jpg\"}]');
-
 -- --------------------------------------------------------
 
 --
@@ -159,7 +138,7 @@ CREATE TABLE `subscriptions` (
 --
 
 INSERT INTO `subscriptions` (`id_subscription`, `id_user`, `id_world_cup`, `subscription_date`) VALUES
-(3, 7, 1, '2026-04-25 15:13:18');
+(6, 8, 1, '2026-05-13 23:46:52');
 
 -- --------------------------------------------------------
 
@@ -185,9 +164,10 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id_user`, `full_name`, `birth_date`, `photo_url`, `gender`, `country`, `birth_place`, `email`, `password`, `id_user_type`) VALUES
-(1, 'bob', '2008-06-18', '', '', 'Chile', NULL, 'asdf@hotmail.com', 'Asdf1234', 1),
-(2, 'waos', '2015-06-19', '', '', 'México', NULL, 'Qwer@hotmail.com', 'Qwer1234', 1),
-(7, 'bye', '2026-04-01', '', '', 'Colombia', NULL, 'Zxcv@hotmail.com', 'Zxcv1234', 1);
+(1, 'bob', '2008-06-18', NULL, '', 'Chile', NULL, 'asdf@hotmail.com', 'Asdf1234', 1),
+(2, 'waos', '2015-06-19', 'http://localhost:3000/uploads/profile_photos/1778711495063-Uanl-color-sim.png', '', 'México', NULL, 'Qwer@hotmail.com', 'Qwer1234', 1),
+(7, 'bye', '2026-04-01', '', '', 'Colombia', NULL, 'Zxcv@hotmail.com', 'Zxcv1234', 1),
+(8, 'Patricio Gonzalez', '2004-02-08', 'http://localhost:3000/uploads/profile_photos/1778716003325-image-removebg-preview.png', '', 'México', NULL, 'patogzz08@gmail.com', 'Pgzz080204', 1);
 
 -- --------------------------------------------------------
 
@@ -229,7 +209,29 @@ CREATE TABLE `world_cups` (
 --
 
 INSERT INTO `world_cups` (`id_world_cup`, `name`, `date`, `host`, `image_url`, `description`) VALUES
-(1, 'World Cup Test', '2022-11-20', 'Qatar', NULL, 'Mundial de prueba');
+(1, 'Mundial 1930', '1930-07-13', 'Uruguay 🇺🇾', 'https://flagcdn.com/w640/uy.png', 'El primer torneo mundialista de la historia, ganado por la selección anfitriona.'),
+(2, 'Mundial 1934', '1934-05-27', 'Italia 🇮🇹', 'https://flagcdn.com/w640/it.png', 'El primer mundial disputado en Europa, marcado por el tenso contexto político de la época.'),
+(3, 'Mundial 1938', '1938-06-04', 'Francia 🇫🇷', 'https://flagcdn.com/w640/fr.png', 'El último torneo antes de la Segunda Guerra Mundial; Italia logra el histórico bicampeonato.'),
+(4, 'Mundial 1950', '1950-06-24', 'Brasil 🇧🇷', 'https://flagcdn.com/w640/br.png', 'El histórico e inolvidable \"Maracanazo\", donde Uruguay sorprendió al mundo entero.'),
+(5, 'Mundial 1954', '1954-06-16', 'Suiza 🇨🇭', 'https://flagcdn.com/w640/ch.png', 'El \"Milagro de Berna\": la sorpresiva victoria de Alemania Federal ante la mítica Hungría.'),
+(6, 'Mundial 1958', '1958-06-08', 'Suecia 🇸🇪', 'https://flagcdn.com/w640/se.png', 'El nacimiento de la leyenda de Pelé con tan solo 17 años y la primera estrella para Brasil.'),
+(7, 'Mundial 1962', '1962-05-30', 'Chile 🇨🇱', 'https://flagcdn.com/w640/cl.png', 'Brasil logra el bicampeonato en un torneo recordado por su gran dureza física.'),
+(8, 'Mundial 1966', '1966-07-11', 'Inglaterra 🏴󠁧󠁢󠁥󠁮󠁧󠁿', 'https://flagcdn.com/w640/gb-eng.png', 'El único título mundial de los inventores del fútbol, logrado dramáticamente en casa.'),
+(9, 'Mundial 1970', '1970-05-31', 'México 🇲🇽', 'https://flagcdn.com/w640/mx.png', 'Considerado uno de los mejores mundiales, con el Brasil de Pelé en su máximo esplendor.'),
+(10, 'Mundial 1974', '1974-06-13', 'Alemania Federal 🇩🇪', 'https://flagcdn.com/w640/de.png', 'La victoria táctica alemana sobre la revolucionaria \"Naranja Mecánica\" de Johan Cruyff.'),
+(11, 'Mundial 1978', '1978-06-01', 'Argentina 🇦🇷', 'https://flagcdn.com/w640/ar.png', 'La primera consagración de la Albiceleste en casa bajo el liderazgo goleador de Mario Kempes.'),
+(12, 'Mundial 1982', '1982-06-13', 'España 🇪🇸', 'https://flagcdn.com/w640/es.png', 'El tercer título de Italia tras superar a un Brasil de ensueño y a una dura Alemania.'),
+(13, 'Mundial 1986', '1986-05-31', 'México 🇲🇽', 'https://flagcdn.com/w640/mx.png', 'La consagración de Maradona y el mundial de \"La Mano de Dios\".'),
+(14, 'Mundial 1990', '1990-06-08', 'Italia 🇮🇹', 'https://flagcdn.com/w640/it.png', 'La revancha de Alemania Federal ante Argentina en un torneo caracterizado por defensas férreas.'),
+(15, 'Mundial 1994', '1994-06-17', 'Estados Unidos 🇺🇸', 'https://flagcdn.com/w640/us.png', 'La primera final definida en tanda de penales le otorgó el histórico tetracampeonato a Brasil.'),
+(16, 'Mundial 1998', '1998-06-10', 'Francia 🇫🇷', 'https://flagcdn.com/w640/fr.png', 'Zinedine Zidane guía a la anfitriona Francia a conseguir su primer campeonato del mundo.'),
+(17, 'Mundial 2002', '2002-05-31', 'Corea/Japón 🇰🇷🇯🇵', 'https://flagcdn.com/w640/jp.png', 'El primer mundial en Asia coronó a Brasil con su \"Pentacampeonato\" de la mano de Ronaldo.'),
+(18, 'Mundial 2006', '2006-06-09', 'Alemania 🇩🇪', 'https://flagcdn.com/w640/de.png', 'El \"Cuento de Verano\". Un mundial con estadios increíbles donde Italia se llevó la copa en una final inolvidable.'),
+(19, 'Mundial 2010', '2010-06-11', 'Sudáfrica 🇿🇦', 'https://flagcdn.com/w640/za.png', 'El mundial del Waka Waka y la primera estrella para la selección de España.'),
+(20, 'Mundial 2014', '2014-06-12', 'Brasil 🇧🇷', 'https://flagcdn.com/w640/br.png', '¡El mundial de la alegría! Una fiesta total en las gradas, el inolvidable 7-1 y Alemania levantando la copa en el Maracaná.'),
+(21, 'Mundial 2018', '2018-06-14', 'Rusia 🇷🇺', 'https://flagcdn.com/w640/ru.png', 'Un torneo lleno de sorpresas donde Francia demostró su poderío y la tecnología del VAR cambió el fútbol para siempre.'),
+(22, 'Mundial 2022', '2022-11-20', 'Qatar 🇶🇦', 'https://flagcdn.com/w640/qa.png', 'El primer mundial en tierras árabes y el cierre épico para la carrera de Messi.'),
+(23, 'Mundial 2026', '2026-06-11', 'MEX / USA / CAN', 'https://flagcdn.com/w640/us.png', 'El primer mundial organizado por tres naciones con un formato histórico de 48 equipos.');
 
 --
 -- Índices para tablas volcadas
@@ -341,7 +343,7 @@ ALTER TABLE `notifications`
 -- AUTO_INCREMENT de la tabla `posts`
 --
 ALTER TABLE `posts`
-  MODIFY `id_post` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=63;
+  MODIFY `id_post` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=66;
 
 --
 -- AUTO_INCREMENT de la tabla `reactions`
@@ -353,13 +355,13 @@ ALTER TABLE `reactions`
 -- AUTO_INCREMENT de la tabla `subscriptions`
 --
 ALTER TABLE `subscriptions`
-  MODIFY `id_subscription` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id_subscription` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT de la tabla `users`
 --
 ALTER TABLE `users`
-  MODIFY `id_user` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id_user` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT de la tabla `user_types`
@@ -371,7 +373,7 @@ ALTER TABLE `user_types`
 -- AUTO_INCREMENT de la tabla `world_cups`
 --
 ALTER TABLE `world_cups`
-  MODIFY `id_world_cup` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id_world_cup` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
 
 --
 -- Restricciones para tablas volcadas
