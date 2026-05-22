@@ -96,195 +96,190 @@
         <img class="media-viewer-content" id="viewer-img">
     </div>
 
-    <script>
-        const loggedUserId = localStorage.getItem('userId');
-        const urlParams = new URLSearchParams(window.location.search);
-        const year = urlParams.get('year');
-        
-        let currentWorldCupId = null;
+<script>
+    const loggedUserId = localStorage.getItem('userId');
+    const token = localStorage.getItem('token');
+    const urlParams = new URLSearchParams(window.location.search);
+    const year = urlParams.get('year');
+    
+    let currentWorldCupId = null;
 
-        if (!loggedUserId) {
-            window.location.href = 'login.html';
-        }
-
-        // Lógica del Visor Lightbox
-        function openViewer(src) {
-            document.getElementById('viewer-img').src = src;
-            document.getElementById('mediaViewer').style.display = 'block';
-        }
-        function closeViewer() {
-            document.getElementById('mediaViewer').style.display = 'none';
-            document.getElementById('viewer-img').src = '';
-        }
-
-        async function loadDetails() {
-            try {
-                const resCup = await fetch(`http://localhost:3000/world-cups/buscar/${year}`);
-                const cup = await resCup.json();
-                
-                currentWorldCupId = cup.id_world_cup;
-                document.getElementById('cup-name').innerText = cup.name;
-                document.getElementById('cup-desc').innerText = cup.description;
-
-                fetchPosts();
-            } catch (e) { 
-                console.error(e);
-                document.getElementById('cup-name').innerText = "Mundial no encontrado";
-            }
-        }
-
-        async function fetchPosts() {
-            if(!currentWorldCupId) return;
-
-            try {
-                const resPosts = await fetch(`http://localhost:3000/posts/worldcup/${currentWorldCupId}`);
-                const posts = await resPosts.json();
-                
-                const container = document.getElementById('cup-posts');
-                container.innerHTML = posts.length ? '' : '<p style="text-align: center; color: #666;">Aún no hay comentarios sobre este mundial. ¡Sé el primero!</p>';
-
-                posts.forEach(post => {
-                    const userName = post.User ? post.User.full_name : "Aficionado";
-                    let userPhoto = post.User && post.User.photo_url ? post.User.photo_url : "";
-                    
-                    if (!userPhoto || userPhoto === "null") {
-                        const iniciales = userName.substring(0, 2).toUpperCase();
-                        userPhoto = `https://placehold.co/40x40/1B365D/FFFFFF?text=${iniciales}`;
-                    }
-
-                    let mediaHTML = "";
-                    if(post.media_urls){
-                        try {
-                            const mediaList = JSON.parse(post.media_urls);
-                            if (mediaList.length > 0) {
-                                mediaHTML = `<div class="media-grid">`;
-                                mediaList.forEach(media=>{
-                                    if(media.type === "image"){
-                                        mediaHTML += `<img src="http://localhost:3000${media.url}" onclick="openViewer(this.src)">`;
-                                    }
-                                    if(media.type === "video"){
-                                        mediaHTML += `<video controls><source src="http://localhost:3000${media.url}"></video>`;
-                                    }
-                                });
-                                mediaHTML += `</div>`;
-                            }
-                        } catch(e) { console.error(e); }
-                    }
-
-                    container.innerHTML += `
-                        <div class="post-card">
-                            <div style="display: flex; align-items: center; margin-bottom: 10px;">
-                                <img src="${userPhoto}" style="width: 40px; height: 40px; border-radius: 50%; margin-right: 10px; object-fit: cover;">
-                                <div>
-                                    <h5 style="margin: 0; color: #1B365D;">${userName}</h5>
-                                    <small style="color: #999;">${new Date(post.created_at).toLocaleDateString()}</small>
-                                </div>
-                            </div>
-                            <h4 style="margin: 0 0 5px 0; color: #333;">${post.title}</h4>
-                            <p style="color: #444; margin: 0; line-height: 1.5;">${post.content}</p>
-                            ${mediaHTML}
-                        </div>
-                    `;
-                });
-            } catch (e) { console.error(e); }
-        }
-
-        document.getElementById('form-create-post').addEventListener('submit', async (event) => {
-            event.preventDefault();
-
-            if(!currentWorldCupId) {
-                return alert("Espera a que cargue la información del mundial antes de publicar.");
-            }
-
-            const formData = new FormData();
-            formData.append("title", document.getElementById('post_title').value);
-            formData.append("content", document.getElementById('post_content').value);
-            formData.append("id_user", loggedUserId);
-            formData.append("id_world_cup", currentWorldCupId);
-            formData.append("id_category", 1);
-
-            const mediaInput = document.getElementById('post_media');
-            if (mediaInput && mediaInput.files) {
-                for (let i = 0; i < mediaInput.files.length; i++) {
-                    formData.append("media", mediaInput.files[i]);
-                }
-            }
-
-            try {
-                const response = await fetch('http://localhost:3000/posts', {
-                    method: 'POST',
-                    body: formData
-                });
-
-                if (response.ok) {
-                    event.target.reset();
-                    fetchPosts(); 
-                } else {
-                    alert("Error al intentar publicar.");
-                }
-            } catch (error) {
-                alert("Error de conexión con el servidor.");
-            }
-        });
-        //--- Lógica de Notificaciones ---
-const bellBtn = document.getElementById('notif-bell');
-const dropdown = document.getElementById('notif-dropdown');
-
-if (bellBtn && dropdown) {
-    bellBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
-    });
-
-    document.addEventListener('click', () => {
-        if (dropdown.style.display === 'block') dropdown.style.display = 'none';
-    });
-
-    dropdown.addEventListener('click', (e) => {
-        e.stopPropagation();
-    });
-}
-
-async function fetchNotificationsSilently() {
-    const userId = localStorage.getItem('userId');
-    if (!userId) return;
-
-    const list = document.getElementById('notif-list');
-    const badge = document.getElementById('notif-count');
-
-    try {
-        const res = await fetch(`http://localhost:3000/notifications/user/${userId}`);
-        const myNotifs = await res.json();
-        const unread = myNotifs.filter(n => !n.is_read);
-
-        if (unread.length > 0) {
-            badge.innerText = unread.length;
-            badge.style.display = 'block';
-        } else {
-            badge.style.display = 'none';
-        }
-
-        if (myNotifs.length > 0) {
-            list.innerHTML = myNotifs.map(n => `
-                <div class="notif-item ${n.is_read ? '' : 'unread'}" style="padding: 10px; border-bottom: 1px solid #eee; background-color: ${n.is_read ? 'white' : '#f0f8ff'};">
-                    <strong>${n.type ? n.type.toUpperCase() : 'AVISO'}</strong>: ${n.message}
-                    <div style="font-size: 0.7rem; color: #999; margin-top: 5px;">
-                        ${new Date(n.created_at).toLocaleDateString()}
-                    </div>
-                </div>
-            `).join('');
-        } else {
-            list.innerHTML = '<p style="padding: 15px; text-align: center; color: #666; margin: 0;">No hay Notificaciones Nuevas</p>';
-        }
-    } catch (err) {
-        console.error("Error al cargar notificaciones:", err);
-        if (list) list.innerHTML = '<p style="padding: 15px; text-align: center; color: red;">Error de conexión</p>';
+    if (!loggedUserId || !token) {
+        window.location.href = 'login.html';
     }
-}
 
+    const authHeaders = {
+        'Authorization': `Bearer ${token}`
+    };
 
-        fetchNotificationsSilently();
-        loadDetails();
-    </script>
+    function openViewer(src) {
+        document.getElementById('viewer-img').src = src;
+        document.getElementById('mediaViewer').style.display = 'block';
+    }
+    function closeViewer() {
+        document.getElementById('mediaViewer').style.display = 'none';
+        document.getElementById('viewer-img').src = '';
+    }
+
+    async function loadDetails() {
+        try {
+            const resCup = await fetch(`http://localhost:3000/world-cups/buscar/${year}`, { headers: authHeaders });
+            const cup = await resCup.json();
+            
+            currentWorldCupId = cup.id_world_cup;
+            document.getElementById('cup-name').innerText = cup.name;
+            document.getElementById('cup-desc').innerText = cup.description;
+
+            fetchPosts();
+        } catch (e) { 
+            console.error(e);
+            document.getElementById('cup-name').innerText = "Mundial no encontrado";
+        }
+    }
+
+    async function fetchPosts() {
+        if(!currentWorldCupId) return;
+        try {
+            const resPosts = await fetch(`http://localhost:3000/posts/worldcup/${currentWorldCupId}`, { headers: authHeaders });
+            const posts = await resPosts.json();
+            
+            const container = document.getElementById('cup-posts');
+            container.innerHTML = posts.length ? '' : '<p style="text-align: center; color: #666;">Aún no hay comentarios sobre este mundial. ¡Sé el primero!</p>';
+
+            posts.forEach(post => {
+                const userName = post.User ? post.User.full_name : "Aficionado";
+                let userPhoto = post.User && post.User.photo_url ? post.User.photo_url : "";
+                
+                if (!userPhoto || userPhoto === "null") {
+                    const iniciales = userName.substring(0, 2).toUpperCase();
+                    userPhoto = `https://placehold.co/40x40/1B365D/FFFFFF?text=${iniciales}`;
+                }
+
+                let mediaHTML = "";
+                if(post.media_urls){
+                    try {
+                        const mediaList = JSON.parse(post.media_urls);
+                        if (mediaList.length > 0) {
+                            mediaHTML = `<div class="media-grid">`;
+                            mediaList.forEach(media=>{
+                                if(media.type === "image"){
+                                    mediaHTML += `<img src="http://localhost:3000${media.url}" onclick="openViewer(this.src)">`;
+                                }
+                                if(media.type === "video"){
+                                    mediaHTML += `<video controls><source src="http://localhost:3000${media.url}"></video>`;
+                                }
+                            });
+                            mediaHTML += `</div>`;
+                        }
+                    } catch(e) { console.error(e); }
+                }
+
+                container.innerHTML += `
+                    <div class="post-card">
+                        <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                            <img src="${userPhoto}" style="width: 40px; height: 40px; border-radius: 50%; margin-right: 10px; object-fit: cover;">
+                            <div>
+                                <h5 style="margin: 0; color: #1B365D;">${userName}</h5>
+                                <small style="color: #999;">${new Date(post.created_at).toLocaleDateString()}</small>
+                            </div>
+                        </div>
+                        <h4 style="margin: 0 0 5px 0; color: #333;">${post.title}</h4>
+                        <p style="color: #444; margin: 0; line-height: 1.5;">${post.content}</p>
+                        ${mediaHTML}
+                    </div>
+                `;
+            });
+        } catch (e) { console.error(e); }
+    }
+
+    document.getElementById('form-create-post').addEventListener('submit', async (event) => {
+        event.preventDefault();
+
+        if(!currentWorldCupId) {
+            return alert("Espera a que cargue la información del mundial antes de publicar.");
+        }
+
+        const formData = new FormData();
+        formData.append("title", document.getElementById('post_title').value);
+        formData.append("content", document.getElementById('post_content').value);
+        formData.append("id_user", loggedUserId);
+        formData.append("id_world_cup", currentWorldCupId);
+        formData.append("id_category", 1);
+
+        const mediaInput = document.getElementById('post_media');
+        if (mediaInput && mediaInput.files) {
+            for (let i = 0; i < mediaInput.files.length; i++) {
+                formData.append("media", mediaInput.files[i]);
+            }
+        }
+
+        try {
+            const response = await fetch('http://localhost:3000/posts', {
+                method: 'POST',
+                headers: authHeaders, // Al ser FormData, no lleva Content-Type
+                body: formData
+            });
+
+            if (response.ok) {
+                event.target.reset();
+                fetchPosts(); 
+            } else {
+                alert("Error al intentar publicar.");
+            }
+        } catch (error) {
+            alert("Error de conexión con el servidor.");
+        }
+    });
+
+    const bellBtn = document.getElementById('notif-bell');
+    const dropdown = document.getElementById('notif-dropdown');
+    if (bellBtn && dropdown) {
+        bellBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+        });
+        document.addEventListener('click', () => {
+            if (dropdown.style.display === 'block') dropdown.style.display = 'none';
+        });
+        dropdown.addEventListener('click', (e) => { e.stopPropagation(); });
+    }
+
+    async function fetchNotificationsSilently() {
+        if (!loggedUserId) return;
+        const list = document.getElementById('notif-list');
+        const badge = document.getElementById('notif-count');
+        try {
+            const res = await fetch(`http://localhost:3000/notifications/user/${loggedUserId}`, { headers: authHeaders });
+            const myNotifs = await res.json();
+            const unread = myNotifs.filter(n => !n.is_read);
+
+            if (unread.length > 0) {
+                badge.innerText = unread.length;
+                badge.style.display = 'block';
+            } else {
+                badge.style.display = 'none';
+            }
+
+            if (myNotifs.length > 0) {
+                list.innerHTML = myNotifs.map(n => `
+                    <div class="notif-item ${n.is_read ? '' : 'unread'}" style="padding: 10px; border-bottom: 1px solid #eee; background-color: ${n.is_read ? 'white' : '#f0f8ff'};">
+                        <strong>${n.type ? n.type.toUpperCase() : 'AVISO'}</strong>: ${n.message}
+                        <div style="font-size: 0.7rem; color: #999; margin-top: 5px;">
+                            ${new Date(n.created_at).toLocaleDateString()}
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                list.innerHTML = '<p style="padding: 15px; text-align: center; color: #666; margin: 0;">No hay Notificaciones Nuevas</p>';
+            }
+        } catch (err) {
+            console.error("Error al cargar notificaciones:", err);
+            if (list) list.innerHTML = '<p style="padding: 15px; text-align: center; color: red;">Error de conexión</p>';
+        }
+    }
+
+    fetchNotificationsSilently();
+    loadDetails();
+</script>
 </body>
 </html>

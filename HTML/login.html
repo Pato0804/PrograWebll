@@ -33,20 +33,17 @@
 
 <script>
     document.getElementById('form-login').addEventListener('submit', async (event) => {
-        event.preventDefault(); // Evita que la página se recargue
+        event.preventDefault(); 
 
-        // 1. Extraer los datos
         const email = document.getElementById('email').value;
         const password = document.getElementById('password').value;
 
-        // 2. Empaquetar los datos
         const loginData = {
             email: email,
             password: password
         };
 
         try {
-            //Hacer la petición al Backend
             const response = await fetch('http://localhost:3000/users/login', {
                 method: 'POST',
                 headers: {
@@ -56,15 +53,14 @@
             });
 
             const data = await response.json();
-
   
             if (response.ok) {
                 alert('¡Bienvenido, ' + data.user.name + '!');
                 
                 localStorage.setItem('userId', data.user.id);
                 localStorage.setItem('userName', data.user.name);
+                localStorage.setItem('token', data.token); //Guarda el token en el localstorage
 
-                // Redirigir a la página principal
                 window.location.href = 'home.html'; 
             } else {
                 alert('Error: ' + data.error);
@@ -75,6 +71,9 @@
         }
     });
 </script>
+
+</body>
+</html>
 
 </body>
 </html>

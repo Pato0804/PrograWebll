@@ -60,80 +60,83 @@
         </form>
     </div>
     
-    <script>
+<script>
+    const loggedUserId = localStorage.getItem('userId');
+    const token = localStorage.getItem('token');
 
-// Script para manejar la edición del perfil
-const loggedUserId = localStorage.getItem('userId');
+    if (!loggedUserId || !token) {
+        window.location.href = 'login.html';
+    }
 
-// Cargar datos actuales
-async function loadCurrentData() {
-    try {
-        const response = await fetch(`http://localhost:3000/users/${loggedUserId}`);
-        const user = await response.json();
+    const authHeaders = {
+        'Authorization': `Bearer ${token}`
+    };
+
+    async function loadCurrentData() {
+        try {
+            const response = await fetch(`http://localhost:3000/users/${loggedUserId}`, { headers: authHeaders });
+            const user = await response.json();
+            
+            document.getElementById('full_name').value = user.full_name;
+            document.getElementById('country').value = user.country;
+            
+            const genderSelect = document.getElementById('gender');
+            if(genderSelect) {
+                genderSelect.value = user.gender;
+            }
+        } catch (error) {
+            console.error("Error al cargar datos:", error);
+        }
+    }
+
+    document.getElementById('form-edit-profile').addEventListener('submit', async (e) => {
+        e.preventDefault();
         
-        document.getElementById('full_name').value = user.full_name;
-        document.getElementById('country').value = user.country;
+        const photoInput = document.getElementById('photo_file');
+
+        if (photoInput && photoInput.files.length > 0) {
+            const file = photoInput.files[0];
+            if (!file.type.startsWith('image/')) {
+                return alert("El archivo seleccionado no es una imagen válida.");
+            }
+            if (file.size > 5 * 1024 * 1024) { 
+                return alert("La imagen es demasiado grande. Por favor, elige una que pese menos de 5MB.");
+            }
+        }
+
+        const formData = new FormData();
+        formData.append('full_name', document.getElementById('full_name').value);
+        formData.append('country', document.getElementById('country').value);
         
-        // Verifica si tienes el campo de género en la vista de edición
         const genderSelect = document.getElementById('gender');
         if(genderSelect) {
-            genderSelect.value = user.gender;
+            formData.append('gender', genderSelect.value);
         }
-    } catch (error) {
-        console.error("Error al cargar datos:", error);
-    }
-}
 
-// Guardar cambios
-document.getElementById('form-edit-profile').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    
-    const photoInput = document.getElementById('photo_file');
-
-    // Validación de Imagen
-    if (photoInput && photoInput.files.length > 0) {
-        const file = photoInput.files[0];
-        if (!file.type.startsWith('image/')) {
-            return alert("El archivo seleccionado no es una imagen válida.");
+        if (photoInput && photoInput.files.length > 0) {
+            formData.append('photo', photoInput.files[0]);
         }
-        if (file.size > 5 * 1024 * 1024) { // Límite de 5 MB
-            return alert("La imagen es demasiado grande. Por favor, elige una que pese menos de 5MB.");
+
+        try {
+            const response = await fetch(`http://localhost:3000/users/${loggedUserId}`, {
+                method: 'PATCH',
+                headers: authHeaders, // Al ser FormData, no lleva Content-Type
+                body: formData
+            });
+
+            if (response.ok) {
+                alert('¡Perfil actualizado correctamente!');
+                localStorage.setItem('userName', document.getElementById('full_name').value);
+                window.location.href = 'profile.html';
+            } else {
+                alert('Hubo un error al actualizar el perfil.');
+            }
+        } catch (error) {
+            alert('Error al conectar con el servidor.');
         }
-    }
+    });
 
-    const formData = new FormData();
-    formData.append('full_name', document.getElementById('full_name').value);
-    formData.append('country', document.getElementById('country').value);
-    
-    const genderSelect = document.getElementById('gender');
-    if(genderSelect) {
-        formData.append('gender', genderSelect.value);
-    }
-
-    if (photoInput && photoInput.files.length > 0) {
-        formData.append('photo', photoInput.files[0]);
-    }
-
-    try {
-        const response = await fetch(`http://localhost:3000/users/${loggedUserId}`, {
-            method: 'PATCH',
-            body: formData
-        });
-
-        if (response.ok) {
-            alert('¡Perfil actualizado correctamente!');
-            localStorage.setItem('userName', document.getElementById('full_name').value);
-            window.location.href = 'profile.html';
-        } else {
-            alert('Hubo un error al actualizar el perfil.');
-        }
-    } catch (error) {
-        alert('Error al conectar con el servidor.');
-    }
-});
-
-loadCurrentData();
-
-    </script>
+    loadCurrentData();
+</script>
 </body>
 </html>

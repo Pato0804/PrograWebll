@@ -13,6 +13,7 @@ import reactionsRoutes from './JAVA/reactions.js';
 import subscriptionRoutes from './JAVA/subscriptions.js';
 import worldCupSearchRoutes from './JAVA/worldCupRoutes.js'; 
 import worldCupsRoutes from './JAVA/worldCups.js';
+import { verificarToken } from './JAVA/middlewares/authMiddleware.js';
 
 const app = express();
 const port = 3000;
@@ -20,8 +21,6 @@ const port = 3000;
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
-
-// LÍNEA CRÍTICA: Hace que la carpeta de fotos sea accesible desde el navegador
 app.use('/uploads', express.static('uploads'));
 
 console.log('Starting server...');
@@ -31,9 +30,13 @@ sequelize.authenticate()
     .then(() => console.log('Connected to MySQL with Sequelize (DB: webprog2)'))
     .catch(err => console.error('Error connecting to the database:', err));
 
+//Ruta publica para login y registro (no requiere token)
+app.use('/users', usersRoutes); // Login y registro no requieren token
+
+//Rutas protegidas (requieren token)
+app.use(verificarToken); // Middleware de autenticación para las rutas siguientes
 app.use('/world-cups', worldCupSearchRoutes); 
 app.use('/worldcups', worldCupsRoutes);
-app.use('/users', usersRoutes);
 app.use('/user-types', userTypesRoutes);
 app.use('/friendships', friendshipsRoutes);
 app.use('/categories', categoriesRoutes);

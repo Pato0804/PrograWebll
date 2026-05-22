@@ -1,19 +1,25 @@
 console.log("social.js cargado correctamente");
 
+const token = localStorage.getItem('token');
+const miId = localStorage.getItem('userId');
+
+const authHeadersJSON = {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${token}`
+};
+
 async function cargarListaDeUsuarios() {
-    const miId = localStorage.getItem('userId');
-    
     try {
-        const response = await fetch('http://localhost:3000/users');
-        if (!response.ok) throw new Error('Error: ${response.status}');
+        const response = await fetch('http://localhost:3000/users', {
+            headers: authHeadersJSON
+        });
+        
+        if (!response.ok) throw new Error(`Error: ${response.status}`);
         
         const usuarios = await response.json();
         const contenedor = document.getElementById('lista-usuarios');
         
-        if (!contenedor) {
-            console.error("No se encontró el elemento 'lista-usuarios'");
-            return;
-        }
+        if (!contenedor) return;
 
         contenedor.innerHTML = '';
 
@@ -34,12 +40,8 @@ async function cargarListaDeUsuarios() {
     }
 }
 
-//enviar soli
 async function enviarSolicitud(idAmigo, botonElemento) {
-    const miId = localStorage.getItem('userId');
-    const miNombre = "Alguien";
-
-    if (!miId) {
+    if (!miId || !token) {
         alert("Primero debes iniciar sesión");
         return;
     }
@@ -47,7 +49,7 @@ async function enviarSolicitud(idAmigo, botonElemento) {
     try {
         const responseAmistad = await fetch('http://localhost:3000/friendships', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: authHeadersJSON,
             body: JSON.stringify({
                 requester_id: parseInt(miId),
                 receiver_id: idAmigo,
@@ -59,7 +61,7 @@ async function enviarSolicitud(idAmigo, botonElemento) {
         if (responseAmistad.ok) {
             await fetch('http://localhost:3000/notifications', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: authHeadersJSON,
                 body: JSON.stringify({
                     id_user: idAmigo,
                     message: `Has recibido una nueva solicitud de amistad`,
@@ -78,7 +80,7 @@ async function enviarSolicitud(idAmigo, botonElemento) {
         console.error("Error de conexión:", error);
     }
 }
-//buscador
+
 const buscador = document.getElementById('buscador');
 if (buscador) {
     buscador.addEventListener('input', (e) => {

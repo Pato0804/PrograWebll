@@ -57,179 +57,157 @@
         <p style="text-align: center; grid-column: 1/-1;">Cargando catálogo de mundiales...</p>
     </main>
 
-    <script>
-        const loggedUserId = localStorage.getItem('userId');
+<script>
+    const loggedUserId = localStorage.getItem('userId');
+    const token = localStorage.getItem('token');
 
-        if (!loggedUserId) {
-            window.location.href = 'login.html';
-        }
-
-        let userSubscriptions = [];
-
-
-        async function initializePage() {
-            await loadSubscriptions();
-            await loadWorldCups();   
-        }
-
-        //Función para saber a qué estamos suscritos
-        async function loadSubscriptions() {
-            try {
-                const response = await fetch(`http://localhost:3000/subscriptions/user/${loggedUserId}`);
-                if (response.ok) {
-                    const subs = await response.json();
-                    // Extraemos solo los números
-                    userSubscriptions = subs.map(s => s.id_world_cup);
-                }
-            } catch (error) {
-                console.error("Error al cargar suscripciones", error);
-            }
-        }
-
-        //traer el cataglogo de la DB
-        async function loadWorldCups() {
-            const grid = document.getElementById('world-cups-grid');
-            
-            try {
-            
-                const response = await fetch('http://localhost:3000/worldcups');
-                const worldCups = await response.json();
-                
-                grid.innerHTML = ''; 
-
-worldCups.forEach(cup => {
-    // Detectar si está suscrito
-    const isSubscribed = userSubscriptions.includes(cup.id_world_cup);
-    const buttonClass = isSubscribed ? 'btn-red' : 'btn-blue';
-    const buttonText = isSubscribed ? 'Dejar de Seguir' : 'Seguir Mundial';
-    
-    // Si no hay imagen, usar un placeholder con el nombre del mundial
-    const imagenSegura = cup.image_url ? cup.image_url : `https://placehold.co/600x400/1B365D/FFFFFF?text=${cup.name}`;
-    
-    grid.innerHTML += `
-        <div class="world-cup-card">
-            <img src="${imagenSegura}" class="world-cup-img" onerror="this.src='https://placehold.co/600x400/1B365D/FFFFFF?text=Error'">
-            
-            <div class="world-cup-info">
-                <h2 class="world-cup-title">${cup.name}</h2>
-                <p class="world-cup-host">Sede: ${cup.host}</p>
-                <button class="btn-subscribe ${buttonClass}" 
-                        onclick="toggleSubscription(${cup.id_world_cup}, this)">
-                        ${buttonText}
-                </button>
-            </div>
-        </div>`;
-});
-            } catch (error) {
-                grid.innerHTML = '<p style="color: red;">Error al cargar el catálogo. ¿Está encendido Node.js?</p>';
-            }
-        }
-
-
-        // Función para manejar la acción de seguir/dejar de seguir
-        async function toggleSubscription(worldCupId, buttonElement) {
-            buttonElement.disabled = true;
-            
-            const isCurrentlySubscribed = userSubscriptions.includes(worldCupId);
-            
-            try {
-                if (isCurrentlySubscribed) {
-                    // Acción: DEJAR DE SEGUIR (DELETE)
-                    const res = await fetch('http://localhost:3000/subscriptions', {
-                        method: 'DELETE',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ id_user: loggedUserId, id_world_cup: worldCupId })
-                    });
-                    
-                    if (res.ok) {
-
-                        userSubscriptions = userSubscriptions.filter(id => id !== worldCupId);
-
-                        buttonElement.className = 'btn-subscribe btn-blue';
-                        buttonElement.innerText = 'Seguir Mundial';
-                    }
-                } else {
-                    // Acción: SEGUIR (POST)
-                    const res = await fetch('http://localhost:3000/subscriptions', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ id_user: loggedUserId, id_world_cup: worldCupId })
-                    });
-
-                    if (res.ok) {
-                        
-                        userSubscriptions.push(worldCupId);
-                    
-                        buttonElement.className = 'btn-subscribe btn-red';
-                        buttonElement.innerText = 'Dejar de Seguir';
-                    }
-                }
-            } catch (error) {
-                alert('Error al procesar la solicitud.');
-            }
-            
-            // Volvemos a habilitar el botón después de la acción
-            buttonElement.disabled = false;
-        }
-        //--- Lógica de Notificaciones ---
-const bellBtn = document.getElementById('notif-bell');
-const dropdown = document.getElementById('notif-dropdown');
-
-if (bellBtn && dropdown) {
-    bellBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
-    });
-
-    document.addEventListener('click', () => {
-        if (dropdown.style.display === 'block') dropdown.style.display = 'none';
-    });
-
-    dropdown.addEventListener('click', (e) => {
-        e.stopPropagation();
-    });
-}
-
-async function fetchNotificationsSilently() {
-    const userId = localStorage.getItem('userId');
-    if (!userId) return;
-
-    const list = document.getElementById('notif-list');
-    const badge = document.getElementById('notif-count');
-
-    try {
-        const res = await fetch(`http://localhost:3000/notifications/user/${userId}`);
-        const myNotifs = await res.json();
-        const unread = myNotifs.filter(n => !n.is_read);
-
-        if (unread.length > 0) {
-            badge.innerText = unread.length;
-            badge.style.display = 'block';
-        } else {
-            badge.style.display = 'none';
-        }
-
-        if (myNotifs.length > 0) {
-            list.innerHTML = myNotifs.map(n => `
-                <div class="notif-item ${n.is_read ? '' : 'unread'}" style="padding: 10px; border-bottom: 1px solid #eee; background-color: ${n.is_read ? 'white' : '#f0f8ff'};">
-                    <strong>${n.type ? n.type.toUpperCase() : 'AVISO'}</strong>: ${n.message}
-                    <div style="font-size: 0.7rem; color: #999; margin-top: 5px;">
-                        ${new Date(n.created_at).toLocaleDateString()}
-                    </div>
-                </div>
-            `).join('');
-        } else {
-            list.innerHTML = '<p style="padding: 15px; text-align: center; color: #666; margin: 0;">No hay Notificaciones Nuevas</p>';
-        }
-    } catch (err) {
-        console.error("Error al cargar notificaciones:", err);
-        if (list) list.innerHTML = '<p style="padding: 15px; text-align: center; color: red;">Error de conexión</p>';
+    if (!loggedUserId || !token) {
+        window.location.href = 'login.html';
     }
-}
 
+    const authHeaders = {
+        'Authorization': `Bearer ${token}`
+    };
+    
+    const authHeadersJSON = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+    };
 
-        fetchNotificationsSilently();
-        initializePage();
-    </script>
+    let userSubscriptions = [];
+
+    async function initializePage() {
+        await loadSubscriptions();
+        await loadWorldCups();   
+    }
+
+    async function loadSubscriptions() {
+        try {
+            const response = await fetch(`http://localhost:3000/subscriptions/user/${loggedUserId}`, { headers: authHeaders });
+            if (response.ok) {
+                const subs = await response.json();
+                userSubscriptions = subs.map(s => s.id_world_cup);
+            }
+        } catch (error) {
+            console.error("Error al cargar suscripciones", error);
+        }
+    }
+
+    async function loadWorldCups() {
+        const grid = document.getElementById('world-cups-grid');
+        try {
+            const response = await fetch('http://localhost:3000/worldcups', { headers: authHeaders });
+            const worldCups = await response.json();
+            
+            grid.innerHTML = ''; 
+
+            worldCups.forEach(cup => {
+                const isSubscribed = userSubscriptions.includes(cup.id_world_cup);
+                const buttonClass = isSubscribed ? 'btn-red' : 'btn-blue';
+                const buttonText = isSubscribed ? 'Dejar de Seguir' : 'Seguir Mundial';
+                const imagenSegura = cup.image_url ? cup.image_url : `https://placehold.co/600x400/1B365D/FFFFFF?text=${cup.name}`;
+                
+                grid.innerHTML += `
+                    <div class="world-cup-card">
+                        <img src="${imagenSegura}" class="world-cup-img" onerror="this.src='https://placehold.co/600x400/1B365D/FFFFFF?text=Error'">
+                        <div class="world-cup-info">
+                            <h2 class="world-cup-title">${cup.name}</h2>
+                            <p class="world-cup-host">Sede: ${cup.host}</p>
+                            <button class="btn-subscribe ${buttonClass}" 
+                                    onclick="toggleSubscription(${cup.id_world_cup}, this)">
+                                    ${buttonText}
+                            </button>
+                        </div>
+                    </div>`;
+            });
+        } catch (error) {
+            grid.innerHTML = '<p style="color: red;">Error al cargar el catálogo. ¿Está encendido Node.js?</p>';
+        }
+    }
+
+    async function toggleSubscription(worldCupId, buttonElement) {
+        buttonElement.disabled = true;
+        const isCurrentlySubscribed = userSubscriptions.includes(worldCupId);
+        
+        try {
+            if (isCurrentlySubscribed) {
+                const res = await fetch('http://localhost:3000/subscriptions', {
+                    method: 'DELETE',
+                    headers: authHeadersJSON,
+                    body: JSON.stringify({ id_user: loggedUserId, id_world_cup: worldCupId })
+                });
+                if (res.ok) {
+                    userSubscriptions = userSubscriptions.filter(id => id !== worldCupId);
+                    buttonElement.className = 'btn-subscribe btn-blue';
+                    buttonElement.innerText = 'Seguir Mundial';
+                }
+            } else {
+                const res = await fetch('http://localhost:3000/subscriptions', {
+                    method: 'POST',
+                    headers: authHeadersJSON,
+                    body: JSON.stringify({ id_user: loggedUserId, id_world_cup: worldCupId })
+                });
+                if (res.ok) {
+                    userSubscriptions.push(worldCupId);
+                    buttonElement.className = 'btn-subscribe btn-red';
+                    buttonElement.innerText = 'Dejar de Seguir';
+                }
+            }
+        } catch (error) {
+            alert('Error al procesar la solicitud.');
+        }
+        buttonElement.disabled = false;
+    }
+
+    const bellBtn = document.getElementById('notif-bell');
+    const dropdown = document.getElementById('notif-dropdown');
+    if (bellBtn && dropdown) {
+        bellBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+        });
+        document.addEventListener('click', () => {
+            if (dropdown.style.display === 'block') dropdown.style.display = 'none';
+        });
+        dropdown.addEventListener('click', (e) => { e.stopPropagation(); });
+    }
+
+    async function fetchNotificationsSilently() {
+        if (!loggedUserId) return;
+        const list = document.getElementById('notif-list');
+        const badge = document.getElementById('notif-count');
+        try {
+            const res = await fetch(`http://localhost:3000/notifications/user/${loggedUserId}`, { headers: authHeaders });
+            const myNotifs = await res.json();
+            const unread = myNotifs.filter(n => !n.is_read);
+
+            if (unread.length > 0) {
+                badge.innerText = unread.length;
+                badge.style.display = 'block';
+            } else {
+                badge.style.display = 'none';
+            }
+
+            if (myNotifs.length > 0) {
+                list.innerHTML = myNotifs.map(n => `
+                    <div class="notif-item ${n.is_read ? '' : 'unread'}" style="padding: 10px; border-bottom: 1px solid #eee; background-color: ${n.is_read ? 'white' : '#f0f8ff'};">
+                        <strong>${n.type ? n.type.toUpperCase() : 'AVISO'}</strong>: ${n.message}
+                        <div style="font-size: 0.7rem; color: #999; margin-top: 5px;">
+                            ${new Date(n.created_at).toLocaleDateString()}
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                list.innerHTML = '<p style="padding: 15px; text-align: center; color: #666; margin: 0;">No hay Notificaciones Nuevas</p>';
+            }
+        } catch (err) {
+            console.error("Error al cargar notificaciones:", err);
+            if (list) list.innerHTML = '<p style="padding: 15px; text-align: center; color: red;">Error de conexión</p>';
+        }
+    }
+
+    fetchNotificationsSilently();
+    initializePage();
+</script>
 </body>
 </html>

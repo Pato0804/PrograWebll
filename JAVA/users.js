@@ -1,6 +1,7 @@
 import express from 'express';
 import User from '../ORM/usersORM.js';
 import multer from 'multer';
+import jwt from 'jsonwebtoken';
 
 const router = express.Router();
 
@@ -28,7 +29,6 @@ router.post('/', upload.single('photo'), async (req, res) => {
     try {
         const { full_name, birth_date, gender, country, birth_place, email, password, id_user_type } = req.body;
         
-        // Guardamos la dirección web de la imagen
         const photo_url = req.file ? `http://localhost:3000/uploads/profile_photos/${req.file.filename}` : null;
 
         const newUser = await User.create({
@@ -53,8 +53,16 @@ router.post('/login', async (req, res) => {
             return res.status(401).json({ error: 'Contraseña incorrecta.' });
         }
 
+        // GENERAMOS EL TOKEN
+        const token = jwt.sign(
+            { id: user.id_user, role: user.id_user_type },
+            'PW2PIAMUNDIALCLAVE', //Clave
+            { expiresIn: '24h' }
+        );
+
         res.json({
             message: '¡Login exitoso!',
+            token: token, // Enviamos el token al cliente
             user: {
                 id: user.id_user,
                 name: user.full_name,
