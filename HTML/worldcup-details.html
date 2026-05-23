@@ -61,10 +61,6 @@
                 </div>
             </div>
         </div>
-        <div class="nav-search">
-            <input type="text" placeholder="Buscar...">
-            <button type="button">🔍</button>
-        </div>
     </div>
 </nav>
 
@@ -84,7 +80,16 @@
             </form>
         </div>
 
-        <h3 style="color: #1B365D; border-bottom: 2px solid #FFD700; padding-bottom: 10px;">Conversación de los Aficionados</h3>
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #FFD700; padding-bottom: 10px; margin-bottom: 15px;">
+            <h3 style="color: #1B365D; margin: 0;">Conversación de los Aficionados</h3>
+            
+            <select id="post-filter" style="padding: 8px; border-radius: 5px; border: 1px solid #ccc; outline: none; cursor: pointer; font-weight: bold; color: #1B365D;" onchange="fetchPosts()">
+                <option value="recent" selected>Más recientes</option>
+                <option value="oldest">Más antiguos</option>
+                <option value="popular">Más populares</option>
+                <option value="friends">Solo amigos</option>
+            </select>
+        </div>
         
         <div id="cup-posts">
             <p style="text-align: center; color: #666;">Cargando comentarios...</p>
@@ -98,8 +103,8 @@
 
 <script>
     const loggedUserId = localStorage.getItem('userId');
-    const loggedUserType = parseInt(localStorage.getItem('userType'));
     const token = localStorage.getItem('token');
+    const userType = localStorage.getItem('userType');
     const urlParams = new URLSearchParams(window.location.search);
     const year = urlParams.get('year');
     
@@ -114,9 +119,9 @@
     };
 
     const authHeadersJSON = {
-    'Content-Type': 'application/json',
-    'Authorization': `Bearer ${token}`
-};
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+    };
 
     function openViewer(src) {
         document.getElementById('viewer-img').src = src;
@@ -127,40 +132,7 @@
         document.getElementById('viewer-img').src = '';
     }
 
-async function toggleBanPost(postId){
-
-    try {
-
-        const res = await fetch(`http://localhost:3000/posts/${postId}/toggle-ban`, {
-            method: 'PATCH',
-            headers: authHeadersJSON,
-            body: JSON.stringify({
-                id_user: loggedUserId
-            })
-        });
-
-        const data = await res.json();
-
-        if(res.ok){
-
-            alert(data.message);
-
-            fetchPosts();
-
-        } else {
-
-            alert(data.error);
-
-        }
-
-    } catch(error){
-
-        console.error(error);
-
-    }
-
-}
-
+    // cargar detalles del mundial
     async function loadDetails() {
         try {
             const resCup = await fetch(`http://localhost:3000/world-cups/buscar/${year}`, { headers: authHeaders });
@@ -177,10 +149,14 @@ async function toggleBanPost(postId){
         }
     }
 
+    //cargar posts
     async function fetchPosts() {
         if(!currentWorldCupId) return;
+        const filterSelect = document.getElementById('post-filter');
+        const filter = filterSelect ? filterSelect.value : 'recent';
+
         try {
-            const resPosts = await fetch(`http://localhost:3000/posts/worldcup/${currentWorldCupId}`, { headers: authHeaders });
+            const resPosts = await fetch(`http://localhost:3000/posts/worldcup/${currentWorldCupId}?filter=${filter}&userId=${loggedUserId}`, { headers: authHeaders });
             const posts = await resPosts.json();
             
             const container = document.getElementById('cup-posts');
@@ -211,134 +187,281 @@ async function toggleBanPost(postId){
                             });
                             mediaHTML += `</div>`;
                         }
-                    } catch(e) { console.error(e); }
+                    } catch(e) { console.error("Error al leer media:", e); }
                 }
 
-                let adminButtonHTML = "";
+                let actionsHTML = "";
 
-// SOLO ADMINS
-if(loggedUserType == 2){
+                if(post.id_user == loggedUserId){
+                    actionsHTML += `
+                        <button onclick="deletePost(${post.id_post})" style="background: none; border: none; color: #888; cursor: pointer; text-decoration: underline; margin-right: 10px;">Eliminar Post</button>
+                        <button onclick="editPost(${post.id_post}, '${post.title.replace(/'/g, "\\'")}', '${post.content.replace(/'/g, "\\'")}')" style="background: none; border: none; color: #888; cursor: pointer; text-decoration: underline;">Editar Post</button>
+                    `;
+                }
 
-    adminButtonHTML = `
-        <div style="margin-top:15px;">
 
-            <button
-                onclick="toggleBanPost(${post.id_post})"
-                style="
-                    background:${post.is_approved == 1 ? '#2D8C4A' : '#C0392B'};
-                    color:white;
-                    border:none;
-                    padding:10px 15px;
-                    border-radius:5px;
-                    cursor:pointer;
-                    font-weight:bold;
-                "
-            >
-                ${post.is_approved == 1
-                    ? '✅ Desbanear Post'
-                    : '🚫 Banear Post'}
-            </button>
+                if(userType == 2){
+                    actionsHTML += `
+                        <button 
+                            onclick="toggleBan(${post.id_post})"
+                            style="
+                                color: white;
+                                background: ${post.is_approved == 1 ? '#2D8C4A' : '#C0392B'};
+                                padding: 8px 12px;
+                                border: none;
+                                border-radius: 5px;
+                                cursor: pointer;
+                                font-weight: bold;
+                                text-decoration: none; 
+                                margin-left: ${post.id_user == loggedUserId ? '15px' : '0'};
+                            "
+                        >
+                            ${post.is_approved == 1 ? 'Desbanear Post' : 'Banear Post'}
+                        </button>
+                    `;
+                }
 
-        </div>
-    `;
-}
+                if (actionsHTML !== "") {
+                    actionsHTML = `<div class="comment-actions" style="margin-top: 15px;">${actionsHTML}</div>`;
+                }
 
-container.innerHTML += `
-    <div class="post-card">
+                container.innerHTML += `
+                    <div class="post-card">
+                        <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                            <img src="${userPhoto}" style="width: 40px; height: 40px; border-radius: 50%; margin-right: 10px; object-fit: cover;">
+                            <div>
+                                <h5 style="margin: 0; color: #1B365D;">${userName}</h5>
+                                <small style="color: #999;">${new Date(post.created_at).toLocaleDateString()}</small>
+                            </div>
+                        </div>
+                        
+                        ${
+                            post.is_approved == 1
+                            ?
+                            `<div style="background:#2b2b2b; color:white; padding:20px; border-radius:10px; text-align:center; font-weight:bold; font-size:1.1rem; margin-top:10px;">
+                            Este post fue retirado por un moderador
+                            </div>`
+                            :
+                            `<h4 style="margin: 0 0 5px 0; color: #333;">${post.title}</h4>
+                            <p style="color: #444; margin: 0; line-height: 1.5;">${post.content}</p>
+                            ${mediaHTML}`
+                        }
+                        
+                        ${actionsHTML}
 
-        <div style="display: flex; align-items: center; margin-bottom: 10px;">
-            <img src="${userPhoto}" 
-            style="width: 40px; height: 40px; border-radius: 50%; margin-right: 10px; object-fit: cover;">
+                        <div style="margin-top: 15px; border-top: 1px solid #eee; padding-top: 10px; display: flex; align-items: center;">
+                            <button class="like-btn" data-post="${post.id_post}" style="cursor:pointer; background:none; border:none; font-size:1.2rem;">👍</button>
+                            <button class="dislike-btn" data-post="${post.id_post}" style="cursor:pointer; background:none; border:none; font-size:1.2rem;">👎</button>
+                            <span id="reactions-${post.id_post}" style="font-size: 0.9rem; color:#666; margin-left:10px;">Cargando...</span>
+                        </div>
 
-            <div>
-                <h5 style="margin: 0; color: #1B365D;">
-                    ${userName}
-                </h5>
-
-                <small style="color: #999;">
-                    ${new Date(post.created_at).toLocaleDateString()}
-                </small>
-            </div>
-        </div>
-
-        ${
-            post.is_approved == 1
-            ?
-            `
-            <div style="
-                background:#2b2b2b;
-                color:white;
-                padding:20px;
-                border-radius:10px;
-                text-align:center;
-                font-weight:bold;
-                font-size:1.1rem;
-                margin-top:10px;
-            ">
-                🚫 Este post fue baneado
-            </div>
-            `
-            :
-            `
-            <h4 style="margin: 0 0 5px 0; color: #333;">
-                ${post.title}
-            </h4>
-
-            <p style="color: #444; margin: 0; line-height: 1.5;">
-                ${post.content}
-            </p>
-
-            ${mediaHTML}
-            `
-        }
-
-        ${adminButtonHTML}
-
-    </div>
-`;
+                        <div style="margin-top: 10px; display:flex;">
+                            <input id="comment-input-${post.id_post}" class="input-full" style="margin-bottom:0;" placeholder="Escribe un comentario">
+                            <button class="btn-primary comment-btn" data-post="${post.id_post}" style="margin-left:5px;">Comentar</button>
+                        </div>
+                        <div id="comments-${post.id_post}" style="margin-top: 10px;"></div>
+                    </div>
+                `;
             });
+
+            // Asignar los eventos a los botones recién creados
+            posts.forEach(post => {
+                const btn = container.querySelector(`.comment-btn[data-post="${post.id_post}"]`);
+                const likeBtn = container.querySelector(`.like-btn[data-post="${post.id_post}"]`);
+                const dislikeBtn = container.querySelector(`.dislike-btn[data-post="${post.id_post}"]`);
+
+                if(btn) btn.addEventListener('click', () => createComment(post.id_post));
+                if(likeBtn) likeBtn.addEventListener('click', () => react(post.id_post, "like"));
+                if(dislikeBtn) dislikeBtn.addEventListener('click', () => react(post.id_post, "dislike"));
+                
+                loadComments(post.id_post);
+                loadReactions(post.id_post);
+            });
+
         } catch (e) { console.error(e); }
     }
 
-    document.getElementById('form-create-post').addEventListener('submit', async (event) => {
-        event.preventDefault();
+    // eliminar post
+    async function deletePost(postId){
+        if(!confirm("¿Seguro que quieres eliminar esta publicación?")) return;
+        try {
+            await fetch(`http://localhost:3000/posts/${postId}`, {
+                method: 'DELETE',
+                headers: authHeadersJSON
+            });
+            fetchPosts(); 
+        } catch (e) { console.error(e); }
+    }
 
-        if(!currentWorldCupId) {
-            return alert("Espera a que cargue la información del mundial antes de publicar.");
-        }
-
-        const formData = new FormData();
-        formData.append("title", document.getElementById('post_title').value);
-        formData.append("content", document.getElementById('post_content').value);
-        formData.append("id_user", loggedUserId);
-        formData.append("id_world_cup", currentWorldCupId);
-        formData.append("id_category", 1);
-
-        const mediaInput = document.getElementById('post_media');
-        if (mediaInput && mediaInput.files) {
-            for (let i = 0; i < mediaInput.files.length; i++) {
-                formData.append("media", mediaInput.files[i]);
-            }
-        }
+    async function editPost(postId, oldTitle, oldContent){
+        const newTitle = prompt("Nuevo título:", oldTitle);
+        const newContent = prompt("Nuevo contenido:", oldContent);
+        if(!newTitle || !newContent) return;
 
         try {
-            const response = await fetch('http://localhost:3000/posts', {
-                method: 'POST',
-                headers: authHeaders, // Al ser FormData, no lleva Content-Type
-                body: formData
+            await fetch(`http://localhost:3000/posts/${postId}`, {
+                method: 'PUT',
+                headers: authHeadersJSON,
+                body: JSON.stringify({ title: newTitle, content: newContent })
             });
+            fetchPosts(); 
+        } catch (e) { console.error(e); }
+    }
 
-            if (response.ok) {
-                event.target.reset();
+    //moderador banear/desbanear
+    async function toggleBan(postId) {
+        if(!confirm("¿Deseas banearesta publicación?")) return;
+        try {
+            const response = await fetch(`http://localhost:3000/posts/${postId}/toggle-ban`, {
+                method: 'PATCH',
+                headers: authHeadersJSON
+            });
+            if(response.ok) {
                 fetchPosts(); 
             } else {
-                alert("Error al intentar publicar.");
+                alert("Error al ejecutar la acción de moderación. Verifica tus permisos.");
             }
-        } catch (error) {
-            alert("Error de conexión con el servidor.");
-        }
-    });
+        } catch (e) { console.error(e); }
+    }
 
+    //likes/dislikes comentarios
+    async function loadReactions(postId){
+        try{
+            const res = await fetch(`http://localhost:3000/reactions/post/${postId}/count`, { headers: authHeaders });
+            const data = await res.json();
+            const container = document.getElementById(`reactions-${postId}`);
+            if(container) container.innerHTML = `👍 ${data.likes} | 👎 ${data.dislikes}`;
+        } catch (error){ console.error(error); }
+    }
+
+    async function react(postId, type){
+        try{
+            await fetch('http://localhost:3000/reactions', {
+                method: 'POST',
+                headers: authHeadersJSON,
+                body: JSON.stringify({ id_user: loggedUserId, id_post: postId, type })
+            });
+            loadReactions(postId); 
+        } catch (error){ console.error(error); }
+    }
+
+    async function loadComments(postId){
+        const container = document.getElementById(`comments-${postId}`);
+        if(!container) return;
+        try {
+            const res = await fetch(`http://localhost:3000/comments/post/${postId}`, { headers: authHeaders });
+            const comments = await res.json();
+            
+            container.innerHTML = "";
+            comments.forEach(c => {
+                const name = c.User ? c.User.full_name : "Usuario";
+                let photo = (c.User && c.User.photo_url && c.User.photo_url !== "null") ? c.User.photo_url : `https://placehold.co/30x30/1B365D/FFFFFF?text=${name[0]}`;
+
+                let actions = "";
+                if(c.id_user == loggedUserId){
+                    actions = `<div class="comment-actions">
+                                  <button onclick="editComment(${c.id_comment}, '${c.content.replace(/'/g, "\\'")}', ${postId})" style="background:none; border:none; color:#888; font-size:0.75rem; cursor:pointer; text-decoration:underline;">Editar</button>
+                                  <button onclick="deleteComment(${c.id_comment}, ${postId})" style="background:none; border:none; color:#888; font-size:0.75rem; cursor:pointer; text-decoration:underline;">Eliminar</button>
+                               </div>`;
+                }
+
+                container.innerHTML += `
+                    <div class="comment-item" style="display:flex; align-items:flex-start; gap:10px; border-top:1px solid #eee; padding:8px 0; margin-top:5px;">
+                        <img src="${photo}" class="comment-avatar" style="width:30px; height:30px; border-radius:50%; object-fit:cover;">
+                        <div class="comment-body" style="flex-grow: 1;">
+                            <h4 class="comment-name" style="color:#1B365D; font-size:0.9rem; margin:0;">${name}</h4>
+                            <p class="comment-text" style="margin:2px 0; font-size:0.85rem; color:#444;">${c.content}</p>
+                            ${actions}
+                        </div>
+                    </div>`;
+            });
+        } catch(e) { console.error(e); }
+    }
+
+    async function createComment(postId){
+        const input = document.getElementById(`comment-input-${postId}`);
+        const content = input.value;
+        if(!content) return alert("Escribe algo");
+
+        try {
+            const res = await fetch('http://localhost:3000/comments', {
+                method: 'POST',
+                headers: authHeadersJSON,
+                body: JSON.stringify({ content, id_user: loggedUserId, id_post: postId })
+            });
+            if(res.ok) {
+                input.value = "";
+                loadComments(postId);
+            }
+        } catch (error) { console.error(error); }
+    }
+
+    async function editComment(commentId, oldContent, postId){
+        const newContent = prompt("Editar comentario:", oldContent);
+        if(!newContent) return;
+        await fetch(`http://localhost:3000/comments/${commentId}`, {
+            method: 'PUT',
+            headers: authHeadersJSON,
+            body: JSON.stringify({ content: newContent, id_user: loggedUserId })
+        });
+        loadComments(postId); 
+    }
+
+    async function deleteComment(commentId, postId){
+        if(!confirm("¿Eliminar comentario?")) return;
+        await fetch(`http://localhost:3000/comments/${commentId}`, {
+            method: 'DELETE',
+            headers: authHeadersJSON,
+            body: JSON.stringify({ id_user: loggedUserId })
+        });
+        loadComments(postId); 
+    }
+
+    // --- CREACIÓN DE POST ---
+    const formCreate = document.getElementById('form-create-post');
+    if(formCreate) {
+        formCreate.addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            if(!currentWorldCupId) {
+                return alert("Espera a que cargue la información del mundial antes de publicar.");
+            }
+
+            const formData = new FormData();
+            formData.append("title", document.getElementById('post_title').value);
+            formData.append("content", document.getElementById('post_content').value);
+            formData.append("id_user", loggedUserId);
+            formData.append("id_world_cup", currentWorldCupId);
+            formData.append("id_category", 1);
+
+            const mediaInput = document.getElementById('post_media');
+            if (mediaInput && mediaInput.files) {
+                for (let i = 0; i < mediaInput.files.length; i++) {
+                    formData.append("media", mediaInput.files[i]);
+                }
+            }
+
+            try {
+                const response = await fetch('http://localhost:3000/posts', {
+                    method: 'POST',
+                    headers: authHeaders, 
+                    body: formData
+                });
+
+                if (response.ok) {
+                    event.target.reset();
+                    fetchPosts(); 
+                } else {
+                    const errorMsg = await response.json();
+                    alert("Error: " + (errorMsg.error || "No se pudo publicar."));
+                }
+            } catch (error) {
+                alert("Error de conexión con el servidor.");
+            }
+        });
+    }
+
+    // notificaciones y menu
     const bellBtn = document.getElementById('notif-bell');
     const dropdown = document.getElementById('notif-dropdown');
     if (bellBtn && dropdown) {
@@ -389,5 +512,6 @@ container.innerHTML += `
     fetchNotificationsSilently();
     loadDetails();
 </script>
+<script src="search.js"></script>
 </body>
 </html>

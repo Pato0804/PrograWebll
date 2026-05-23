@@ -32,10 +32,6 @@
                 </div>
             </div>
         </div>
-        <div class="nav-search">
-            <input type="text" placeholder="Buscar...">
-            <button type="button">🔍</button>
-        </div>
     </div>
 </nav>
 
@@ -44,14 +40,6 @@
             <div class="filter-group">
                 <label>País Sede</label>
                 <input type="text" placeholder="Ej: México, Brasil...">
-            </div>
-            <div class="filter-group">
-                <label>Año Desde</label>
-                <input type="number" placeholder="1930">
-            </div>
-            <div class="filter-group">
-                <label>Año Hasta</label>
-                <input type="number" placeholder="2026">
             </div>
             <button class="btn-buscar">Filtrar Historial</button>
         </div>
@@ -72,6 +60,10 @@
         'Authorization': `Bearer ${token}`
     };
 
+    //Variable global para los mundiales que sigues
+    let allMyCups = []; 
+
+    //Carga inicial de mundiales y notificaciones
     async function loadWorldCups() {
         const container = document.getElementById('world-cups-container');
         try {
@@ -82,66 +74,94 @@
             const resCups = await fetch('http://localhost:3000/worldcups', { headers: authHeaders });
             const allCups = await resCups.json();
 
-            const myCups = allCups.filter(cup => subscribedIds.includes(cup.id_world_cup));
-            container.innerHTML = '';
-
-            if (myCups.length === 0) {
-                container.innerHTML = `
-                    <div style="grid-column: 1/-1; text-align: center; padding: 40px;">
-                        <p>Aún no sigues ningún mundial.</p>
-                        <a href="explore.html" style="color: #1B365D; font-weight: bold;">¡Ve a explorar y sigue tus favoritos!</a>
-                    </div>`;
-                return;
-            }
-
-            myCups.forEach(worldCup => {
-                const year = worldCup.date ? worldCup.date.split('-')[0] : 'Unknown';
-                const card = document.createElement('div');
-                card.className = 'mundial-card'; 
-                card.innerHTML = `
-                    <img src="${worldCup.image_url}" class="mundial-foto" onerror="this.src='https://placehold.co/640x360/1B365D/FFFFFF?text=${worldCup.name}'">
-                    <div class="card-content">
-                        <h3>${worldCup.name.toUpperCase()}</h3>
-                        <p>${worldCup.description || 'Sin descripción.'}</p>
-                        <a href="../HTML/worldcup-details.html?year=${year}" class="btn-ver">Ver detalles y comentarios</a>
-                    </div>
-                `;
-                container.appendChild(card);
-            });
+            // Guardamos los mundiales que el usuario sigue
+            allMyCups = allCups.filter(cup => subscribedIds.includes(cup.id_world_cup));
+            
+            renderCups(allMyCups);
+            
         } catch (error) {
             console.error('Error:', error);
             container.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: red;">Error al conectar con el servidor.</p>';
         }
     }
 
-    async function fetchNotifications() {
-        const list = document.getElementById('notif-list');
-        const badge = document.getElementById('notif-count');
-        try {
-            const res = await fetch(`http://localhost:3000/notifications/user/${loggedUserId}`, { headers: authHeaders });
-            const myNotifs = await res.json();
-            const unread = myNotifs.filter(n => !n.is_read);
+    function renderCups(cupsToRender) {
+        const container = document.getElementById('world-cups-container');
+        container.innerHTML = '';
 
-            if (unread.length > 0) {
-                badge.innerText = unread.length;
-                badge.style.display = 'block';
-            }
-
-            if (myNotifs.length > 0) {
-                list.innerHTML = myNotifs.map(n => `
-                    <div class="notif-item ${n.is_read ? '' : 'unread'}">
-                        <strong>${n.type.toUpperCase()}</strong>: ${n.message}
-                        <div style="font-size: 0.7rem; color: #999; margin-top: 5px;">
-                            ${new Date(n.created_at).toLocaleDateString()}
-                        </div>
-                    </div>
-                `).join('');
-            }
-        } catch (err) {
-            console.error("Error al cargar notificaciones:", err);
+        if (cupsToRender.length === 0) {
+            container.innerHTML = `
+                <div style="grid-column: 1/-1; text-align: center; padding: 40px;">
+                    <p>No se encontraron resultados o aún no sigues mundiales.</p>
+                    <a href="explore.html" style="color: #1B365D; font-weight: bold;">¡Ve a explorar y sigue tus favoritos!</a>
+                </div>`;
+            return;
         }
+
+        cupsToRender.forEach(worldCup => {
+            const year = worldCup.date ? worldCup.date.split('-')[0] : 'Unknown';
+            const card = document.createElement('div');
+            card.className = 'mundial-card'; 
+            card.innerHTML = `
+                <img src="${worldCup.image_url}" class="mundial-foto" onerror="this.src='https://placehold.co/640x360/1B365D/FFFFFF?text=${worldCup.name}'">
+                <div class="card-content">
+                    <h3>${worldCup.name.toUpperCase()}</h3>
+                    <p>${worldCup.description || 'Sin descripción.'}</p>
+                    <a href="../HTML/worldcup-details.html?year=${year}" class="btn-ver">Ver detalles y comentarios</a>
+                </div>
+            `;
+            container.appendChild(card);
+        });
     }
 
+    //Logica de filtrado
+    function applyHistoryFilter() {
+
+        const searchInput = document.querySelector('.filter-group input');
+        if (!searchInput) return;
+
+        // Obtenemos el texto a buscar y lo normalizamos
+        const query = searchInput.value.toLowerCase().trim();
+
+        // Filtramos la lista buscando nombre, sede o año
+        const filteredCups = allMyCups.filter(cup => {
+            const matchName = cup.name.toLowerCase().includes(query);
+            const matchHost = cup.host ? cup.host.toLowerCase().includes(query) : false;
+            const matchYear = cup.date ? cup.date.includes(query) : false;
+            
+            return matchName || matchHost || matchYear;
+        });
+
+        renderCups(filteredCups);
+    }
+
+    // inputs
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const btnBuscar = document.querySelector('.btn-buscar');
+        const inputBuscar = document.querySelector('.filter-group input');
+
+        if (btnBuscar) {
+            btnBuscar.addEventListener('click', applyHistoryFilter);
+        }
+
+        if (inputBuscar) {
+            inputBuscar.addEventListener('keyup', (event) => {
+                if (event.key === 'Enter') {
+                    applyHistoryFilter();
+                }
+            });
+            
+            // Restaura la lista completa si se borra el texto
+            inputBuscar.addEventListener('input', (event) => {
+                if(event.target.value === '') {
+                    applyHistoryFilter();
+                }
+            });
+        }
+    });
+
+    //Notificaciones
     const bellBtn = document.getElementById('notif-bell');
     const dropdown = document.getElementById('notif-dropdown');
     if (bellBtn && dropdown) {
@@ -189,9 +209,9 @@
         }
     }
 
+
     loadWorldCups();
     fetchNotificationsSilently();
-    fetchNotifications();
 </script>
 <script src="search.js"></script>
 </body>

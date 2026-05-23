@@ -74,19 +74,25 @@
                 </div>
             </div>
         </div>
-        <div class="nav-search">
-            <input type="text" placeholder="Buscar...">
-            <button type="button">🔍</button>
-        </div>
     </div>
 </nav>
 
-    <main class="feed-container">
-        <h2 style="color: #1B365D; border-bottom: 2px solid #FFD700; padding-bottom: 10px;">Tu Muro</h2>
-        <button class="btn-create" onclick="openModal()">
-            Crear publicación
-        </button>
-        <div id="feed-posts">
+<main class="feed-container">
+        <h2 style="color: #1B365D; border-bottom: 2px solid #FFD700; padding-bottom: 10px; width: 100%; max-width: 600px; text-align: center;">Tu Muro</h2>
+        
+        <div style="width: 100%; max-width: 600px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; gap: 10px;">
+            <button class="btn-create" style="margin: 0; flex: 1;" onclick="openModal()">
+                Crear publicación
+            </button>
+            <select id="feed-filter" class="input-full" style="margin: 0; flex: 1; height: 100%; cursor: pointer;" onchange="loadFeed()">
+                <option value="recent" selected> Más recientes</option>
+                <option value="oldest"> Más antiguos</option>
+                <option value="popular"> Más populares</option>
+                <option value="friends"> Solo amigos</option>
+            </select>
+        </div>
+
+        <div id="feed-posts" style="width: 100%;">
             <p style="text-align: center; color: #666;">Cargando tu muro...</p>
         </div>
     </main>
@@ -279,19 +285,22 @@
         loadFeed();
     }
 
-    async function loadFeed() {
+async function loadFeed() {
         const feedContainer = document.getElementById('feed-posts');
+        const filter = document.getElementById('feed-filter').value; // LEEMOS EL FILTRO
+
         try {
             const resCups = await fetch('http://localhost:3000/worldcups', { headers: authHeaders });
             const worldCups = await resCups.json();
 
-            const response = await fetch(`http://localhost:3000/posts/feed/${loggedUserId}`, { headers: authHeaders });
+            //Agregamos el filtro a la petición para que el backend nos devuelva los posts ya filtrados y ordenados según lo seleccionado
+            const response = await fetch(`http://localhost:3000/posts/feed/${loggedUserId}?filter=${filter}`, { headers: authHeaders });
             const posts = await response.json();
             
             feedContainer.innerHTML = ''; 
 
             if (posts.length === 0) {
-                feedContainer.innerHTML = '<p style="text-align: center; color: #666;">Tu muro está vacío. Sigue algún mundial en "Explorar" para ver actualizaciones.</p>';
+                feedContainer.innerHTML = '<p style="text-align: center; color: #666;">No hay publicaciones que mostrar con este filtro.</p>';
                 return;
             }
 
@@ -357,7 +366,7 @@ if(loggedUserType == 2){
  font-weight:bold;
  "
  >
- ${post.is_approved == 1 ? '✅ Desbanear Post' : '🚫 Banear Post'}
+ ${post.is_approved == 1 ? ' Desbanear Post' : ' Banear Post'}
  </button>
 
  </div>
@@ -389,7 +398,7 @@ font-weight:bold;
 font-size:1.2rem;
 margin-top:10px;
 ">
-🚫 Este post fue baneado
+Este post fue retirado por un moderador
 </div>
 `
 :
@@ -484,6 +493,7 @@ ${mediaHTML}
     }
     //baneo de post
     async function toggleBanPost(postId){
+                if(!confirm("¿Deseas banear esta publicación?")) return;
 
     try {
 

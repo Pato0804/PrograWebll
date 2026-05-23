@@ -6,6 +6,28 @@
     <title>MundiConnect - Mi Perfil</title>
     <link rel="stylesheet" href="../CSS/profile.css"> 
     <link rel="stylesheet" href="../CSS/navbar.css">
+    <link rel="stylesheet" href="../CSS/home.css"> <style>
+        .input-full { width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ccc; box-sizing: border-box; }
+        .btn-primary { background: #1B365D; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        .btn-primary:hover { background: #2a528c; }
+        
+        .media-grid { display: grid; gap: 5px; margin-top: 10px; grid-template-columns: repeat(auto-fit, minmax(48%, 1fr)); }
+        .media-grid img, .media-grid video { width: 100%; height: 200px; object-fit: cover; border-radius: 8px; cursor: pointer; }
+        
+        /* Visor Lightbox */
+        .media-viewer { display: none; position: fixed; z-index: 3000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.9); }
+        .media-viewer-content { margin: auto; display: block; max-width: 90%; max-height: 85vh; margin-top: 5vh; object-fit: contain; border-radius: 5px; }
+        .close-viewer { position: absolute; top: 20px; right: 35px; color: #f1f1f1; font-size: 40px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .close-viewer:hover { color: #FFD700; }
+
+        /* Comentarios */
+        .comment-item { display:flex; align-items:flex-start; gap:10px; border-top:1px solid #eee; padding:8px 0; margin-top: 5px; }
+        .comment-avatar { width:30px; height:30px; border-radius:50%; object-fit:cover; }
+        .comment-body { flex-grow: 1; }
+        .comment-name { color:#1B365D; font-size:0.9rem; margin: 0; }
+        .comment-text { margin:2px 0; font-size:0.85rem; color: #444; }
+        .comment-actions button { background: none; border: none; color: #888; font-size: 0.75rem; cursor: pointer; padding: 0; margin-right: 5px; text-decoration: underline; }
+    </style>
 </head>
 <body>
 
@@ -31,47 +53,50 @@
                 </div>
             </div>
         </div>
-        <div class="nav-search">
-            <input type="text" placeholder="Buscar...">
-            <button type="button">🔍</button>
-        </div>
     </div>
 </nav>
-    <main class="perfil-layout">
+
+<main class="perfil-layout">
+    
+    <div class="perfil-header">
+        <div class="portada"></div>
         
-        <div class="perfil-header">
-            <div class="portada"></div>
+        <div class="info-principal">
+            <img id="user-photo" src="" alt="Foto de Perfil" class="foto-perfil" onerror="this.src='https://placehold.co/150x150/1B365D/FFFFFF?text=?'">
             
-            <div class="info-principal">
-                <img id="user-photo" src="" alt="Foto de Perfil" class="foto-perfil" onerror="this.src='https://placehold.co/150x150/1B365D/FFFFFF?text=?'">
+            <div class="datos-usuario">
+                <h1 id="user-name">Cargando Nombre...</h1>
+                <p id="user-subtitle">Cargando ubicación | correo...</p>
                 
-                <div class="datos-usuario">
-                    <h1 id="user-name">Cargando Nombre...</h1>
-                    <p id="user-subtitle">Cargando ubicación | correo...</p>
-                    
-                    <a href="../HTML/edit-profile.html" class="btn-editar-perfil">Editar Perfil</a>
-                </div>
+                <a href="../HTML/edit-profile.html" class="btn-editar-perfil">Editar Perfil</a>
             </div>
         </div>
+    </div>
 
-        <section class="mis-publicaciones">
-            <h3>Mis memorias mundialistas</h3>
+    <div class="mis-publicaciones" style="padding: 10px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #FFD700; margin-bottom: 20px; padding-bottom: 10px;">
+            <h3 style="color: #1B365D; margin: 0; border: none;">Mis Publicaciones</h3>
             
-            <div class="post-card">
-                <p style="color: #666; font-size: 0.9em;"><strong>Tú</strong> • Hace 1 día</p>
-                <p>¡Esperando con ansias el próximo mundial en casa!</p>
-                <div style="margin-top: 15px;">
-                    <button style="background: #f0f2f5; border: 1px solid #ccc; padding: 5px 10px; border-radius: 5px; cursor: pointer;">⚽ 12 Me Gusta</button>
-                    <button style="background: #f0f2f5; border: 1px solid #ccc; padding: 5px 10px; border-radius: 5px; cursor: pointer; color: red; margin-left: 10px;">🗑️ Eliminar</button>
-                </div>
-            </div>
-        </section>
+            <select id="filter-worldcup" style="padding: 8px; border-radius: 5px; border: 1px solid #ccc; font-weight: bold; color: #1B365D; outline: none; cursor: pointer;" onchange="renderPosts()">
+                <option value="all" selected>🏆 Todos los mundiales</option>
+            </select>
+        </div>
 
-    </main>
+        <div id="user-posts" style="display: flex; flex-direction: column; align-items: center;">
+            <p style="text-align: center; color: #666;">Cargando tus publicaciones...</p>
+        </div>
+    </div>
+
+</main>
+
+<div id="mediaViewer" class="media-viewer">
+    <span class="close-viewer" onclick="closeViewer()">&times;</span>
+    <img class="media-viewer-content" id="viewer-img">
+</div>
 
 <script src="search.js"></script>
 <script>
-    const loggedUserId = localStorage.getItem('userId');
+    const loggedUserId = parseInt(localStorage.getItem('userId'));
     const token = localStorage.getItem('token');
 
     if (!loggedUserId || !token) {
@@ -82,6 +107,15 @@
         'Authorization': `Bearer ${token}`
     };
 
+    const authHeadersJSON = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+    };
+
+    let allWorldCups = [];
+    let myPostsCache = [];
+
+    // Cargar datos del perfil
     async function loadUserProfile() {
         try {
             const response = await fetch(`http://localhost:3000/users/${loggedUserId}`, { headers: authHeaders });
@@ -104,6 +138,286 @@
         }
     }
 
+    //visualizador de media
+    function openViewer(src) {
+        document.getElementById('viewer-img').src = src;
+        document.getElementById('mediaViewer').style.display = 'block';
+    }
+    function closeViewer() {
+        document.getElementById('mediaViewer').style.display = 'none';
+        document.getElementById('viewer-img').src = '';
+    }
+
+    //publicaciones del usuario
+    async function fetchMyPosts() {
+        const container = document.getElementById('user-posts');
+        const selectCup = document.getElementById('filter-worldcup');
+
+        try {
+            // Cargar catálogo de mundiales para el filtro
+            if (allWorldCups.length === 0) {
+                const resCups = await fetch('http://localhost:3000/worldcups', { headers: authHeaders });
+                allWorldCups = await resCups.json();
+            }
+
+            // Cargar publicaciones del usuario
+            const resPosts = await fetch(`http://localhost:3000/posts/feed/${loggedUserId}?filter=recent`, { headers: authHeaders });
+            const allPosts = await resPosts.json();
+            
+            // Filtrar solo mis publicaciones para el cache
+            myPostsCache = allPosts.filter(p => p.id_user == loggedUserId);
+
+            // Cargar opciones de filtro de mundiales (solo los que he publicado)
+            if (selectCup.options.length === 1) {
+                const cupsIds = [...new Set(myPostsCache.map(p => p.id_world_cup))];
+                cupsIds.forEach(id => {
+                    const cup = allWorldCups.find(c => c.id_world_cup == id);
+                    if (cup) {
+                        selectCup.innerHTML += `<option value="${id}">${cup.name}</option>`;
+                    }
+                });
+            }
+
+            renderPosts();
+
+        } catch (error) {
+            container.innerHTML = '<p style="text-align: center; color: red;">Error al cargar publicaciones.</p>';
+        }
+    }
+
+    function renderPosts() {
+        const container = document.getElementById('user-posts');
+        const filterCupId = document.getElementById('filter-worldcup').value;
+        
+        container.innerHTML = '';
+
+        let postsToRender = myPostsCache;
+        if (filterCupId !== 'all') {
+            postsToRender = myPostsCache.filter(p => p.id_world_cup == filterCupId);
+        }
+
+        if (postsToRender.length === 0) {
+            container.innerHTML = '<p style="text-align: center; color: #666;">Aún no has hecho publicaciones aquí.</p>';
+            return;
+        }
+
+        postsToRender.forEach(post => {
+            const cupData = allWorldCups.find(c => c.id_world_cup === post.id_world_cup);
+            const cupName = cupData ? cupData.name : 'Mundial General';
+
+            const userName = post.User ? post.User.full_name : localStorage.getItem('userName');
+            let userPhoto = post.User && post.User.photo_url ? post.User.photo_url : "";
+            
+            if (!userPhoto || userPhoto === "null") {
+                const iniciales = userName.substring(0, 2).toUpperCase();
+                userPhoto = `https://placehold.co/40x40/1B365D/FFFFFF?text=${iniciales}`;
+            }
+
+            let mediaHTML = "";
+            if(post.media_urls){
+                try {
+                    const mediaList = JSON.parse(post.media_urls);
+                    if (mediaList.length > 0) {
+                        mediaHTML = `<div class="media-grid">`;
+                        mediaList.forEach(media=>{
+                            if(media.type === "image"){
+                                mediaHTML += `<img src="http://localhost:3000${media.url}" onclick="openViewer(this.src)">`;
+                            }
+                            if(media.type === "video"){
+                                mediaHTML += `<video controls><source src="http://localhost:3000${media.url}"></video>`;
+                            }
+                        });
+                        mediaHTML += `</div>`;
+                    }
+                } catch(e) { console.error("Error al leer media:", e); }
+            }
+
+            let actionsHTML = `
+                <div class="comment-actions" style="margin-top: 10px;">
+                    <button onclick="deletePost(${post.id_post})">Eliminar Post</button>
+                    <button onclick="editPost(${post.id_post}, '${post.title.replace(/'/g, "\\'")}', '${post.content.replace(/'/g, "\\'")}')">Editar Post</button>
+                </div>
+            `;
+
+            const postHTML = `
+                <div class="post-card" style="width: 100%;">
+                    <div class="post-header">
+                        <img src="${userPhoto}" class="post-avatar" style="width:40px; height:40px; border-radius:50%; object-fit:cover; margin-right:10px; vertical-align:middle;">
+                        <div class="post-user-info" style="display:inline-block; vertical-align:middle;">
+                            <h4 style="margin:0; color:#1B365D;">${userName}</h4>
+                            <small style="color: #2D5A27;">📍 ${cupName}</small> <br>
+                            <small style="font-weight: normal; color:#666;">${new Date(post.created_at).toLocaleDateString()}</small>
+                        </div>
+                    </div>
+
+                    ${
+                        post.is_approved == 1
+                        ?
+                        `<div style="background:#2b2b2b; color:white; padding:20px; border-radius:10px; text-align:center; font-weight:bold; font-size:1.2rem; margin-top:10px;">
+                            🚫 Este post fue baneado por un administrador
+                        </div>`
+                        :
+                        `<div class="post-title" style="font-weight:bold; font-size:1.1rem; margin-top:10px;">${post.title}</div>
+                        <div class="post-content" style="color:#444; line-height:1.5;">${post.content}</div>
+                        ${mediaHTML}`
+                    }
+
+                    ${actionsHTML}
+                    
+                    <div style="margin-top: 15px; border-top: 1px solid #eee; padding-top: 10px; display: flex; align-items: center;">
+                        <button class="like-btn" data-post="${post.id_post}" style="cursor:pointer; background:none; border:none; font-size:1.2rem;">👍</button>
+                        <button class="dislike-btn" data-post="${post.id_post}" style="cursor:pointer; background:none; border:none; font-size:1.2rem;">👎</button>
+                        <span id="reactions-${post.id_post}" style="font-size: 0.9rem; color:#666; margin-left:10px;">Cargando...</span>
+                    </div>
+
+                    <div style="margin-top: 10px; display:flex;">
+                        <input id="comment-input-${post.id_post}" class="input-full" style="margin-bottom:0; padding:8px; border:1px solid #ccc; border-radius:5px; flex-grow:1;" placeholder="Escribe un comentario">
+                        <button class="btn-primary comment-btn" data-post="${post.id_post}" style="margin-left:5px; padding:8px 15px;">Comentar</button>
+                    </div>
+                    <div id="comments-${post.id_post}" style="margin-top: 10px;">
+                    </div>
+                </div>
+            `;
+            
+            container.innerHTML += postHTML;
+        });
+
+        // Asignar eventos de interacciones sociales
+        postsToRender.forEach(post => {
+            const btn = container.querySelector(`.comment-btn[data-post="${post.id_post}"]`);
+            const likeBtn = container.querySelector(`.like-btn[data-post="${post.id_post}"]`);
+            const dislikeBtn = container.querySelector(`.dislike-btn[data-post="${post.id_post}"]`);
+
+            if(btn) btn.addEventListener('click', () => createComment(post.id_post));
+            if(likeBtn) likeBtn.addEventListener('click', () => react(post.id_post, "like"));
+            if(dislikeBtn) dislikeBtn.addEventListener('click', () => react(post.id_post, "dislike"));
+            
+            loadComments(post.id_post);
+            loadReactions(post.id_post);
+        });
+    }
+
+    //así se carga el catálogo de mundiales para el filtro
+    async function deletePost(postId){
+        if(!confirm("¿Seguro que quieres eliminar esta publicación?")) return;
+        try {
+            await fetch(`http://localhost:3000/posts/${postId}`, {
+                method: 'DELETE',
+                headers: authHeadersJSON
+            });
+            fetchMyPosts(); // Recargar la lista
+        } catch (e) { console.error(e); }
+    }
+
+    async function editPost(postId, oldTitle, oldContent){
+        const newTitle = prompt("Nuevo título:", oldTitle);
+        const newContent = prompt("Nuevo contenido:", oldContent);
+        if(!newTitle || !newContent) return;
+
+        try {
+            await fetch(`http://localhost:3000/posts/${postId}`, {
+                method: 'PUT',
+                headers: authHeadersJSON,
+                body: JSON.stringify({ title: newTitle, content: newContent })
+            });
+            fetchMyPosts(); // Recargar la lista
+        } catch (e) { console.error(e); }
+    }
+
+    //reacciones y comentarios
+    async function loadReactions(postId){
+        try{
+            const res = await fetch(`http://localhost:3000/reactions/post/${postId}/count`, { headers: authHeaders });
+            const data = await res.json();
+            const container = document.getElementById(`reactions-${postId}`);
+            if(container) container.innerHTML = `👍 ${data.likes} | 👎 ${data.dislikes}`;
+        } catch (error){ console.error(error); }
+    }
+
+    async function react(postId, type){
+        try{
+            await fetch('http://localhost:3000/reactions', {
+                method: 'POST',
+                headers: authHeadersJSON,
+                body: JSON.stringify({ id_user: loggedUserId, id_post: postId, type })
+            });
+            loadReactions(postId); 
+        } catch (error){ console.error(error); }
+    }
+
+    async function loadComments(postId){
+        const container = document.getElementById(`comments-${postId}`);
+        if(!container) return;
+        try {
+            const res = await fetch(`http://localhost:3000/comments/post/${postId}`, { headers: authHeaders });
+            const comments = await res.json();
+            
+            container.innerHTML = "";
+            comments.forEach(c => {
+                const name = c.User ? c.User.full_name : "Usuario";
+                let photo = (c.User && c.User.photo_url && c.User.photo_url !== "null") ? c.User.photo_url : `https://placehold.co/30x30/1B365D/FFFFFF?text=${name[0]}`;
+
+                let actions = "";
+                if(c.id_user == loggedUserId){
+                    actions = `<div class="comment-actions">
+                                  <button onclick="editComment(${c.id_comment}, '${c.content.replace(/'/g, "\\'")}', ${postId})">Editar</button>
+                                  <button onclick="deleteComment(${c.id_comment}, ${postId})">Eliminar</button>
+                               </div>`;
+                }
+
+                container.innerHTML += `
+                    <div class="comment-item">
+                        <img src="${photo}" class="comment-avatar">
+                        <div class="comment-body">
+                            <h4 class="comment-name">${name}</h4>
+                            <p class="comment-text">${c.content}</p>
+                            ${actions}
+                        </div>
+                    </div>`;
+            });
+        } catch(e) { console.error(e); }
+    }
+
+    async function createComment(postId){
+        const input = document.getElementById(`comment-input-${postId}`);
+        const content = input.value;
+        if(!content) return alert("Escribe algo");
+
+        try {
+            const res = await fetch('http://localhost:3000/comments', {
+                method: 'POST',
+                headers: authHeadersJSON,
+                body: JSON.stringify({ content, id_user: loggedUserId, id_post: postId })
+            });
+            if(res.ok) {
+                input.value = "";
+                loadComments(postId);
+            }
+        } catch (error) { console.error(error); }
+    }
+
+    async function editComment(commentId, oldContent, postId){
+        const newContent = prompt("Editar comentario:", oldContent);
+        if(!newContent) return;
+        await fetch(`http://localhost:3000/comments/${commentId}`, {
+            method: 'PUT',
+            headers: authHeadersJSON,
+            body: JSON.stringify({ content: newContent, id_user: loggedUserId })
+        });
+        loadComments(postId); 
+    }
+
+    async function deleteComment(commentId, postId){
+        if(!confirm("Eliminar comentario?")) return;
+        await fetch(`http://localhost:3000/comments/${commentId}`, {
+            method: 'DELETE',
+            headers: authHeadersJSON,
+            body: JSON.stringify({ id_user: loggedUserId })
+        });
+        loadComments(postId); 
+    }
+
+    //notificaciones
     const bellBtn = document.getElementById('notif-bell');
     const dropdown = document.getElementById('notif-dropdown');
     if (bellBtn && dropdown) {
@@ -151,8 +465,10 @@
         }
     }
 
+    // Inicializar todo
     fetchNotificationsSilently();
     loadUserProfile();
+    fetchMyPosts();
 </script>
 
 </body>
