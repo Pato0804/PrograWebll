@@ -3,49 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MundiAmistades</title>
+    <title>MundiConnect - Comunidad</title>
     <link rel="stylesheet" href="../CSS/navbar.css">
     <link rel="stylesheet" href="../CSS/home.css">
     <style>
         body { background-color: #F0F2F5; margin: 0; padding-top: 80px; font-family: Arial, sans-serif; }
-        .feed-container { max-width: 600px; margin: 0 auto; }
-        .post-card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px; }
-        .post-header { display: flex; align-items: center; margin-bottom: 10px; }
-        .post-avatar { width: 40px; height: 40px; border-radius: 50%; margin-right: 10px; background-color: #eee; }
-        .post-user-info h4 { margin: 0; color: #1B365D; }
-        .post-user-info small { color: #666; font-weight: bold; }
-        .post-title { font-size: 1.1em; font-weight: bold; margin-bottom: 5px; color: #333; }
-        .post-content { color: #444; line-height: 1.5; }
-
-          .explore-container { 
-        max-width: 600px; 
-        margin: 20px auto; 
-        display: flex; 
-        flex-direction: column; 
-        align-items: center; 
-    }
-    
-    .user-card { 
-        background: white; 
-        padding: 20px; 
-        border-radius: 10px; 
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
-        margin-bottom: 15px; 
-        width: 100%; 
-        max-width: 500px; /* Esto hace que no se estiren demasiado */
-        display: flex; 
-        justify-content: space-between; 
-        align-items: center;
-    }
-    
-    #buscador { 
-        width: 100%; 
-        max-width: 500px; 
-        padding: 10px; 
-        margin-bottom: 20px; 
-        border: 1px solid #ddd; 
-        border-radius: 5px; 
-    }
+        .explore-container { max-width: 600px; margin: 20px auto; display: flex; flex-direction: column; align-items: center; padding: 0 15px; }
+        .user-card { background: white; padding: 15px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 12px; width: 100%; max-width: 500px; display: flex; justify-content: space-between; align-items: center; }
+        #buscador { width: 100%; max-width: 500px; padding: 12px; margin-bottom: 20px; border: 1px solid #ddd; border-radius: 5px; outline: none; font-size: 1rem; }
+        .btn-primary { background-color: #1B365D; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        .btn-primary:hover { background-color: #2a528c; }
+        .btn-success { background-color: #2D5A27; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; font-weight: bold; margin-right: 5px; }
+        .btn-danger { background-color: #A62626; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -56,7 +25,7 @@
             <a href="home.html">Inicio</a>
             <a href="explore.html">Explorar</a>
             <a href="profile.html">Perfil</a>
-            <a href="friendship.html"class="active">Personas</a>
+            <a href="friendship.html" class="active">Personas</a>
             <a href="history.html">Historial</a>
             <a href="login.html" style="margin-left: 15px;">Cerrar sesión</a>
             
@@ -72,75 +41,235 @@
                 </div>
             </div>
         </div>
+        <div class="nav-search">
+            <input type="text" placeholder="Buscar...">
+            <button type="button">🔍</button>
+        </div>
     </div>
 </nav>
 
-    <main class="explore-container">
-        <h2 style="color: #1B365D;">Explorar amistades</h2>
-        <input type="text" id="buscador" placeholder="Buscar...">
-        <div id="lista-usuarios"></div>
-    </main>
+<main class="explore-container">
+    
+    <h2 style="color: #1B365D; width: 100%; max-width: 500px; text-align: left; margin-bottom: 10px;">Solicitudes Pendientes</h2>
+    <div id="lista-solicitudes" style="width: 100%; max-width: 500px; margin-bottom: 25px;">
+        <p style="text-align: center; color: #666;">Cargando solicitudes...</p>
+    </div>
 
-    <script src="social.js">
-        //--- Lógica de Notificaciones ---
-const bellBtn = document.getElementById('notif-bell');
-const dropdown = document.getElementById('notif-dropdown');
+    <h2 style="color: #1B365D; width: 100%; max-width: 500px; text-align: left; margin-bottom: 10px; border-top: 2px solid #FFD700; padding-top: 20px;">Explorar Aficionados</h2>
+    <input type="text" id="buscador" placeholder="Buscar por nombre...">
+    <div id="lista-usuarios" style="width: 100%; max-width: 500px;">
+        <p style="text-align: center; color: #666;">Cargando aficionados...</p>
+    </div>
+    
+</main>
 
-if (bellBtn && dropdown) {
-    bellBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
-    });
+<script>
+    const token = localStorage.getItem('token');
+    const miId = parseInt(localStorage.getItem('userId'));
 
-    document.addEventListener('click', () => {
-        if (dropdown.style.display === 'block') dropdown.style.display = 'none';
-    });
-
-    dropdown.addEventListener('click', (e) => {
-        e.stopPropagation();
-    });
-}
-
-async function fetchNotificationsSilently() {
-    const userId = localStorage.getItem('userId');
-    if (!userId) return;
-
-    const list = document.getElementById('notif-list');
-    const badge = document.getElementById('notif-count');
-
-    try {
-        const res = await fetch(`http://localhost:3000/notifications/user/${userId}`);
-        const myNotifs = await res.json();
-        const unread = myNotifs.filter(n => !n.is_read);
-
-        if (unread.length > 0) {
-            badge.innerText = unread.length;
-            badge.style.display = 'block';
-        } else {
-            badge.style.display = 'none';
-        }
-
-        if (myNotifs.length > 0) {
-            list.innerHTML = myNotifs.map(n => `
-                <div class="notif-item ${n.is_read ? '' : 'unread'}" style="padding: 10px; border-bottom: 1px solid #eee; background-color: ${n.is_read ? 'white' : '#f0f8ff'};">
-                    <strong>${n.type ? n.type.toUpperCase() : 'AVISO'}</strong>: ${n.message}
-                    <div style="font-size: 0.7rem; color: #999; margin-top: 5px;">
-                        ${new Date(n.created_at).toLocaleDateString()}
-                    </div>
-                </div>
-            `).join('');
-        } else {
-            list.innerHTML = '<p style="padding: 15px; text-align: center; color: #666; margin: 0;">No hay Notificaciones Nuevas</p>';
-        }
-    } catch (err) {
-        console.error("Error al cargar notificaciones:", err);
-        if (list) list.innerHTML = '<p style="padding: 15px; text-align: center; color: red;">Error de conexión</p>';
+    if (!miId || !token) {
+        window.location.href = 'login.html';
     }
-}
+
+    const authHeaders = { 'Authorization': `Bearer ${token}` };
+    const authHeadersJSON = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` };
+
+    //cargar la lista de usuarios disponibles para enviar solicitudes (excluyendo a mí mismo y a quienes ya tengo una relación)
+    async function cargarListaDeUsuarios() {
+        try {
+            //obtener todas las relaciones de amistad para saber con quiénes ya tengo una relación (pendiente o aceptada)
+            const resFriends = await fetch('http://localhost:3000/friendships', { headers: authHeaders });
+            const friendships = await resFriends.json();
+
+            //guardar los IDs de usuarios con los que ya tengo una relación (pendiente o aceptada)
+            const vinculadosIds = friendships
+                .filter(f => f.requester_id == miId || f.receiver_id == miId)
+                .map(f => f.requester_id == miId ? f.receiver_id : f.requester_id);
+
+            const response = await fetch('http://localhost:3000/users', { headers: authHeaders });
+            const usuarios = await response.json();
+            
+            const contenedor = document.getElementById('lista-usuarios');
+            contenedor.innerHTML = '';
+
+            let disponibles = 0;
+            usuarios.forEach(user => {
+                // No listarme a mí mismo ni a quienes ya tienen solicitudes en marcha
+                if (user.id_user != miId && !vinculadosIds.includes(user.id_user)) {
+                    disponibles++;
+                    const divUsuario = document.createElement('div');
+                    divUsuario.className = 'user-card'; 
+                    divUsuario.innerHTML = `
+                        <p style="margin:0; font-weight:bold; color:#1B365D;">${user.full_name}</p>
+                        <button class="btn-primary" onclick="enviarSolicitud(${user.id_user}, this)">Agregar amigo</button>
+                    `;
+                    contenedor.appendChild(divUsuario);
+                }
+            });
+
+            if (disponibles === 0) {
+                contenedor.innerHTML = '<p style="text-align: center; color: #666;">No hay nuevos aficionados disponibles por el momento.</p>';
+            }
+        } catch (error) {
+            console.error("Error al cargar usuarios:", error);
+        }
+    }
+
+    //mandar solicitud de amistad a un usuario específico
+    async function enviarSolicitud(idAmigo, botonElemento) {
+        try {
+            const responseAmistad = await fetch('http://localhost:3000/friendships', {
+                method: 'POST',
+                headers: authHeadersJSON,
+                body: JSON.stringify({
+                    requester_id: miId,
+                    receiver_id: idAmigo,
+                    status: 'pending',
+                    request_date: new Date().toISOString().split('T')[0]
+                })
+            });
+
+            if (responseAmistad.ok) {
+                await fetch('http://localhost:3000/notifications', {
+                    method: 'POST',
+                    headers: authHeadersJSON,
+                    body: JSON.stringify({
+                        id_user: idAmigo,
+                        message: `Has recibido una nueva solicitud de amistad`,
+                        type: 'friend',
+                        is_read: false
+                    })
+                });
+                alert("¡Solicitud enviada con éxito!");
+                botonElemento.disabled = true;
+                botonElemento.textContent = "Solicitud enviada";
+                botonElemento.style.backgroundColor = "gray";
+            }
+        } catch (error) { console.error(error); }
+    }
+
+    //cargar solicitudes pendientes que he recibido
+    async function cargarSolicitudesPendientes() {
+        const contenedor = document.getElementById('lista-solicitudes');
+        try {
+            const res = await fetch(`http://localhost:3000/friendships/received/${miId}`, { headers: authHeaders });
+            const solicitudes = await res.json();
+
+            contenedor.innerHTML = '';
+
+            if (solicitudes.length === 0) {
+                contenedor.innerHTML = '<p style="color: #666; font-style: italic; margin: 5px 0;">No tienes solicitudes de amistad pendientes.</p>';
+                return;
+            }
+
+            solicitudes.forEach(sol => {
+                const nombreRemitente = sol.Requester ? sol.Requester.full_name : "Aficionado";
+                const divSoli = document.createElement('div');
+                divSoli.className = 'user-card';
+                divSoli.style.borderLeft = '4px solid #FFD700';
+                divSoli.innerHTML = `
+                    <p style="margin:0; font-weight:bold; color:#1B365D;">🤝 ${nombreRemitente}</p>
+                    <div>
+                        <button class="btn-success" onclick="aceptarSolicitud(${sol.id_friendship})">Aceptar</button>
+                        <button class="btn-danger" onclick="eliminarSolicitud(${sol.id_friendship})">Rechazar</button>
+                    </div>
+                `;
+                contenedor.appendChild(divSoli);
+            });
+        } catch (error) { console.error(error); }
+    }
+
+    // aceptar solicitud (cambiar el estado a accepted)
+    async function aceptarSolicitud(idFriendship) {
+        try {
+            const res = await fetch(`http://localhost:3000/friendships/${idFriendship}/accept`, {
+                method: 'PATCH',
+                headers: authHeadersJSON
+            });
+
+            if (res.ok) {
+                alert("¡Solicitud aceptada! Ahora verás sus posts filtrados por Amigos.");
+                cargarSolicitudesPendientes();
+                cargarListaDeUsuarios();
+            }
+        } catch (error) { console.error(error); }
+    }
+
+    //rejectar solicitud (eliminar la solicitud pendiente)
+    async function eliminarSolicitud(idFriendship) {
+        try {
+            const res = await fetch(`http://localhost:3000/friendships/${idFriendship}`, {
+                method: 'DELETE',
+                headers: authHeaders
+            });
+            if (res.ok) {
+                cargarSolicitudesPendientes();
+                cargarListaDeUsuarios();
+            }
+        } catch (error) { console.error(error); }
+    }
+
+    //buscador de usuarios
+    const buscador = document.getElementById('buscador');
+    if (buscador) {
+        buscador.addEventListener('input', (e) => {
+            const textoBusqueda = e.target.value.toLowerCase();
+            const usuariosCards = document.querySelectorAll('#lista-usuarios .user-card');
+            usuariosCards.forEach(card => {
+                const nombreUsuario = card.querySelector('p').textContent.toLowerCase();
+                card.style.display = nombreUsuario.includes(textoBusqueda) ? 'flex' : 'none';
+            });
+        });
+    }
+
+    //notificaciones
+    async function fetchNotificationsSilently() {
+        const list = document.getElementById('notif-list');
+        const badge = document.getElementById('notif-count');
+        try {
+            const res = await fetch(`http://localhost:3000/notifications/user/${miId}`, { headers: authHeaders });
+            const myNotifs = await res.json();
+            const unread = myNotifs.filter(n => !n.is_read);
+
+            if (unread.length > 0) {
+                badge.innerText = unread.length;
+                badge.style.display = 'block';
+            } else {
+                badge.style.display = 'none';
+            }
+
+            if (myNotifs.length > 0) {
+                list.innerHTML = myNotifs.map(n => `
+                    <div class="notif-item ${n.is_read ? '' : 'unread'}" style="padding: 10px; border-bottom: 1px solid #eee; background-color: ${n.is_read ? 'white' : '#f0f8ff'};">
+                        <strong>${n.type ? n.type.toUpperCase() : 'AVISO'}</strong>: ${n.message}
+                        <div style="font-size: 0.7rem; color: #999; margin-top: 5px;">
+                            ${new Date(n.created_at).toLocaleDateString()}
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                list.innerHTML = '<p style="padding: 15px; text-align: center; color: #666; margin: 0;">No hay Notificaciones Nuevas</p>';
+            }
+        } catch (err) { console.error(err); }
+    }
+
+    const bellBtn = document.getElementById('notif-bell');
+    const dropdown = document.getElementById('notif-dropdown');
+    if (bellBtn && dropdown) {
+        bellBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+        });
+        document.addEventListener('click', () => {
+            if (dropdown.style.display === 'block') dropdown.style.display = 'none';
+        });
+        dropdown.addEventListener('click', (e) => { e.stopPropagation(); });
+    }
 
 
     fetchNotificationsSilently();
-    </script>
-    
+    cargarSolicitudesPendientes();
+    cargarListaDeUsuarios();
+</script>
 </body>
 </html>
