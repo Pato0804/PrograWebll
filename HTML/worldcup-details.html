@@ -98,6 +98,7 @@
 
 <script>
     const loggedUserId = localStorage.getItem('userId');
+    const loggedUserType = parseInt(localStorage.getItem('userType'));
     const token = localStorage.getItem('token');
     const urlParams = new URLSearchParams(window.location.search);
     const year = urlParams.get('year');
@@ -112,6 +113,11 @@
         'Authorization': `Bearer ${token}`
     };
 
+    const authHeadersJSON = {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${token}`
+};
+
     function openViewer(src) {
         document.getElementById('viewer-img').src = src;
         document.getElementById('mediaViewer').style.display = 'block';
@@ -120,6 +126,40 @@
         document.getElementById('mediaViewer').style.display = 'none';
         document.getElementById('viewer-img').src = '';
     }
+
+async function toggleBanPost(postId){
+
+    try {
+
+        const res = await fetch(`http://localhost:3000/posts/${postId}/toggle-ban`, {
+            method: 'PATCH',
+            headers: authHeadersJSON,
+            body: JSON.stringify({
+                id_user: loggedUserId
+            })
+        });
+
+        const data = await res.json();
+
+        if(res.ok){
+
+            alert(data.message);
+
+            fetchPosts();
+
+        } else {
+
+            alert(data.error);
+
+        }
+
+    } catch(error){
+
+        console.error(error);
+
+    }
+
+}
 
     async function loadDetails() {
         try {
@@ -174,20 +214,88 @@
                     } catch(e) { console.error(e); }
                 }
 
-                container.innerHTML += `
-                    <div class="post-card">
-                        <div style="display: flex; align-items: center; margin-bottom: 10px;">
-                            <img src="${userPhoto}" style="width: 40px; height: 40px; border-radius: 50%; margin-right: 10px; object-fit: cover;">
-                            <div>
-                                <h5 style="margin: 0; color: #1B365D;">${userName}</h5>
-                                <small style="color: #999;">${new Date(post.created_at).toLocaleDateString()}</small>
-                            </div>
-                        </div>
-                        <h4 style="margin: 0 0 5px 0; color: #333;">${post.title}</h4>
-                        <p style="color: #444; margin: 0; line-height: 1.5;">${post.content}</p>
-                        ${mediaHTML}
-                    </div>
-                `;
+                let adminButtonHTML = "";
+
+// SOLO ADMINS
+if(loggedUserType == 2){
+
+    adminButtonHTML = `
+        <div style="margin-top:15px;">
+
+            <button
+                onclick="toggleBanPost(${post.id_post})"
+                style="
+                    background:${post.is_approved == 1 ? '#2D8C4A' : '#C0392B'};
+                    color:white;
+                    border:none;
+                    padding:10px 15px;
+                    border-radius:5px;
+                    cursor:pointer;
+                    font-weight:bold;
+                "
+            >
+                ${post.is_approved == 1
+                    ? '✅ Desbanear Post'
+                    : '🚫 Banear Post'}
+            </button>
+
+        </div>
+    `;
+}
+
+container.innerHTML += `
+    <div class="post-card">
+
+        <div style="display: flex; align-items: center; margin-bottom: 10px;">
+            <img src="${userPhoto}" 
+            style="width: 40px; height: 40px; border-radius: 50%; margin-right: 10px; object-fit: cover;">
+
+            <div>
+                <h5 style="margin: 0; color: #1B365D;">
+                    ${userName}
+                </h5>
+
+                <small style="color: #999;">
+                    ${new Date(post.created_at).toLocaleDateString()}
+                </small>
+            </div>
+        </div>
+
+        ${
+            post.is_approved == 1
+            ?
+            `
+            <div style="
+                background:#2b2b2b;
+                color:white;
+                padding:20px;
+                border-radius:10px;
+                text-align:center;
+                font-weight:bold;
+                font-size:1.1rem;
+                margin-top:10px;
+            ">
+                🚫 Este post fue baneado
+            </div>
+            `
+            :
+            `
+            <h4 style="margin: 0 0 5px 0; color: #333;">
+                ${post.title}
+            </h4>
+
+            <p style="color: #444; margin: 0; line-height: 1.5;">
+                ${post.content}
+            </p>
+
+            ${mediaHTML}
+            `
+        }
+
+        ${adminButtonHTML}
+
+    </div>
+`;
             });
         } catch (e) { console.error(e); }
     }

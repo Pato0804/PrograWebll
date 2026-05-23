@@ -127,4 +127,64 @@ router.delete('/:id', async (req, res) => {
     }
 });
 
+// banear post por el admin 
+router.patch('/:id/toggle-ban', async (req, res) => {
+
+    try {
+
+        const postId = req.params.id;
+        const { id_user } = req.body;
+
+        // Buscar usuario
+        const user = await User.findByPk(id_user);
+
+        if (!user) {
+            return res.status(404).json({
+                error: 'Usuario no encontrado'
+            });
+        }
+
+        // Verificar admin
+        if (user.id_user_type != 2) {
+            return res.status(403).json({
+                error: 'No tienes permisos'
+            });
+        }
+
+        // Buscar post
+        const post = await Post.findByPk(postId);
+
+        if (!post) {
+            return res.status(404).json({
+                error: 'Post no encontrado'
+            });
+        }
+
+        // CAMBIAR ESTADO
+        const nuevoEstado = !post.is_approved;
+
+        await post.update({
+            is_approved: nuevoEstado,
+            approved_at: nuevoEstado ? new Date() : null
+        });
+
+        res.json({
+            message: nuevoEstado
+                ? 'Post baneado'
+                : 'Post desbaneado',
+            is_approved: nuevoEstado
+        });
+
+    } catch (error) {
+
+        console.error(error);
+
+        res.status(500).json({
+            error: 'Error al cambiar estado del post'
+        });
+
+    }
+
+});
+
 export default router;

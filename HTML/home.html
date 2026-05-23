@@ -115,6 +115,7 @@
 
 <script> 
     const loggedUserId = parseInt(localStorage.getItem('userId'));
+    const loggedUserType = parseInt(localStorage.getItem('userType'));
     const token = localStorage.getItem('token'); //Obtenemos el token
 
     if (!loggedUserId || !token) {
@@ -327,13 +328,41 @@
 
                 let actionsHTML = "";
                 if(post.id_user == loggedUserId){
-                    actionsHTML = `
-                        <div class="comment-actions" style="margin-top: 10px;">
-                            <button onclick="deletePost(${post.id_post})">Eliminar Post</button>
-                            <button onclick="editPost(${post.id_post}, '${post.title.replace(/'/g, "\\'")}', '${post.content.replace(/'/g, "\\'")}')">Editar Post</button>
-                        </div>
-                    `;
-                }
+
+ actionsHTML += `
+ <div class="comment-actions" style="margin-top: 10px;">
+ <button onclick="deletePost(${post.id_post})">Eliminar Post</button>
+ <button onclick="editPost(${post.id_post}, '${post.title.replace(/'/g, "\\'")}', '${post.content.replace(/'/g, "\\'")}')">
+ Editar Post
+ </button>
+ </div>
+ `;
+}
+
+// aca lo del admin weon
+if(loggedUserType == 2){
+
+ actionsHTML += `
+ <div class="comment-actions" style="margin-top: 10px;">
+
+ <button 
+ onclick="toggleBanPost(${post.id_post})"
+ style="
+ color:white;
+ background:${post.is_approved == 1 ? '#2D8C4A' : '#C0392B'};
+ padding:8px 12px;
+ border:none;
+ border-radius:5px;
+ cursor:pointer;
+ font-weight:bold;
+ "
+ >
+ ${post.is_approved == 1 ? '✅ Desbanear Post' : '🚫 Banear Post'}
+ </button>
+
+ </div>
+ `;
+}
 
                 const postHTML = `
                     <div class="post-card">
@@ -346,10 +375,30 @@
                             </div>
                         </div>
 
-                        <div class="post-title">${post.title}</div>
-                        <div class="post-content">${post.content}</div>
-
-                        ${mediaHTML}
+                        ${
+post.is_approved == 1
+?
+`
+<div style="
+background:#2b2b2b;
+color:white;
+padding:20px;
+border-radius:10px;
+text-align:center;
+font-weight:bold;
+font-size:1.2rem;
+margin-top:10px;
+">
+🚫 Este post fue baneado
+</div>
+`
+:
+`
+<div class="post-title">${post.title}</div>
+<div class="post-content">${post.content}</div>
+${mediaHTML}
+`
+}
                         ${actionsHTML}
                         
                         <div style="margin-top: 15px; border-top: 1px solid #eee; padding-top: 10px; display: flex; align-items: center;">
@@ -433,7 +482,40 @@
             }
         } catch(error){ console.error(error); }
     }
+    //baneo de post
+    async function toggleBanPost(postId){
 
+    try {
+
+        const res = await fetch(`http://localhost:3000/posts/${postId}/toggle-ban`, {
+            method: 'PATCH',
+            headers: authHeadersJSON,
+            body: JSON.stringify({
+                id_user: loggedUserId
+            })
+        });
+
+        const data = await res.json();
+
+        if(res.ok){
+
+            alert(data.message);
+
+            loadFeed();
+
+        } else {
+
+            alert(data.error);
+
+        }
+
+    } catch(error){
+
+        console.error(error);
+
+    }
+
+}
     // Notificaciones con token
     async function fetchNotificationsSilently() {
         if (!loggedUserId) return;

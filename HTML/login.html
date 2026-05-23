@@ -60,6 +60,7 @@
                 localStorage.setItem('userId', data.user.id);
                 localStorage.setItem('userName', data.user.name);
                 localStorage.setItem('token', data.token); //Guarda el token en el localstorage
+                localStorage.setItem("userType", data.user.type);
 
                 window.location.href = 'home.html'; 
             } else {
