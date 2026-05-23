@@ -4,6 +4,7 @@ import Post from '../ORM/postsORM.js';
 import Subscription from '../ORM/subscriptionsORM.js'; 
 import User from '../ORM/usersORM.js'; // IMPORTAMOS EL MODELO USER
 import multer from 'multer';
+import { verificarToken } from '../JAVA/middlewares/authMiddleware.js';
 
 const router = express.Router();
 
@@ -52,7 +53,11 @@ router.get('/feed/:userId', async (req, res) => {
 });
 
 // ruta para crear un nuevo post (POST)
-router.post('/', upload.array('media', 10), async (req, res) => {
+router.post(
+ '/',
+ verificarToken,
+ upload.array('media'),
+ async(req,res)=> {
     try {
         const { title, content, id_user, id_world_cup, id_category } = req.body;
         let media_urls = [];
@@ -66,6 +71,22 @@ router.post('/', upload.array('media', 10), async (req, res) => {
                 });
             });
         }
+
+if(!title || title.trim().length < 3){
+
+    return res.status(400).json({
+        error:'El título debe tener mínimo 3 caracteres'
+    });
+
+}
+
+if(!content || content.trim().length < 5){
+
+    return res.status(400).json({
+        error:'El contenido debe tener mínimo 5 caracteres'
+    });
+
+}
 
         await Post.create({
             title, content, id_user, id_world_cup, id_category,
@@ -93,15 +114,19 @@ router.get('/worldcup/:worldCupId', async (req, res) => {
     }
 });
 
-router.put('/:id', async (req, res) => {
+router.put('/:id', verificarToken, async (req, res) => {
     try {
         const postId = req.params.id;
-        const { title, content, id_user } = req.body;
+        const { title, content } = req.body;
+
+const id_user = req.user.id;
+
+
 
         const post = await Post.findByPk(postId);
 
         if (!post) { return res.status(404).json({ error: 'Post no encontrado' }); }
-        if (post.id_user != id_user) { return res.status(403).json({ error: 'No tienes permiso para editar este post' }); }
+        if (post.id_user != req.user.id) { return res.status(403).json({ error: 'No tienes permiso para editar este post' }); }
 
         await post.update({ title, content });
         res.json({ message: 'Post actualizado correctamente' });
@@ -110,7 +135,7 @@ router.put('/:id', async (req, res) => {
     }
 });
 
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', verificarToken, async (req, res) => {
     try {
         const postId = req.params.id;
         const { id_user } = req.body;
@@ -118,7 +143,7 @@ router.delete('/:id', async (req, res) => {
         const post = await Post.findByPk(postId);
 
         if (!post) { return res.status(404).json({ error: 'Post no encontrado' }); }
-        if (post.id_user != id_user) { return res.status(403).json({ error: 'No tienes permiso para eliminar este post' }); }
+        if (post.id_user != req.user.id) { return res.status(403).json({ error: 'No tienes permiso para eliminar este post' }); }
 
         await post.destroy();
         res.json({ message: 'Post eliminado correctamente' });
@@ -128,15 +153,12 @@ router.delete('/:id', async (req, res) => {
 });
 
 // banear post por el admin 
-router.patch('/:id/toggle-ban', async (req, res) => {
+router.patch('/:id/toggle-ban', verificarToken, async (req, res) => {
 
     try {
 
         const postId = req.params.id;
-        const { id_user } = req.body;
-
-        // Buscar usuario
-        const user = await User.findByPk(id_user);
+        const user = await User.findByPk(req.user.id);
 
         if (!user) {
             return res.status(404).json({

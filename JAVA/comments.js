@@ -1,7 +1,7 @@
 import express from 'express';
 import Comment from '../ORM/commentsORM.js';
 import User from '../ORM/usersORM.js';
-
+import { verificarToken } from '../JAVA/middlewares/authMiddleware.js';
 const router =express.Router();
 
 
@@ -34,14 +34,20 @@ router.get('/:id',async(req, res) => {
     res.json(comments);
 });
 
-router.post('/', async (req, res) => {
+router.post('/', verificarToken, async (req, res) => {
     try {
-        const { content, id_user, id_post,created_at } = req.body;
-
+        const { content,  id_post,created_at } = req.body;
+const id_user = req.user.id;
         if (!content || !id_user || !id_post) {
             return res.status(400).json({ error: 'Faltan datos' });
         }
+if(!content || content.trim().length < 2){
 
+    return res.status(400).json({
+        error:'Comentario demasiado corto'
+    });
+
+}
         const newComment = await Comment.create({
             content,
             id_user,
@@ -59,10 +65,11 @@ router.post('/', async (req, res) => {
 
 
 
-router.put('/:id', async (req, res) => {
+router.put('/:id',verificarToken, async (req, res) => {
     try {
         const comment = await Comment.findByPk(req.params.id);
-        const { content, id_user } = req.body;
+        const { content } = req.body;
+        const id_user = req.user.id;
 
         if (!comment) {
             return res.status(404).json({ error: 'Comentario no encontrado' });
@@ -81,10 +88,10 @@ router.put('/:id', async (req, res) => {
     }
 });
 
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', verificarToken,async (req, res) => {
     try {
         const comment = await Comment.findByPk(req.params.id);
-        const { id_user } = req.body;
+        const id_user = req.user.id;
 
         if (!comment) {
             return res.status(404).json({ error: 'Comentario no encontrado' });

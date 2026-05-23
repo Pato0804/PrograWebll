@@ -1,6 +1,6 @@
 import express from 'express';
 import Reaction from '../ORM/reactionsORM.js';
-
+import { verificarToken } from '../JAVA/middlewares/authMiddleware.js';
 const router =express.Router();
 
 router.get('/',async(req, res) => {
@@ -33,8 +33,17 @@ router.get('/:id',async(req, res) => {
     res.json(reactions);
 });
 
-router.post('/', async (req, res) => {
-    const { id_user, id_post, type } = req.body;
+router.post('/', verificarToken, async (req, res) => {
+    const {  id_post, type } = req.body;
+    const id_user = req.user.id;
+
+if(type !== 'like' && type !== 'dislike'){
+
+    return res.status(400).json({
+        error:'Tipo de reacción inválido'
+    });
+
+}
 
     try {
         const existing = await Reaction.findOne({

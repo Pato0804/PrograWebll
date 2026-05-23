@@ -2,6 +2,7 @@ import express from 'express';
 import User from '../ORM/usersORM.js';
 import multer from 'multer';
 import jwt from 'jsonwebtoken';
+import { verificarToken } from '../JAVA/middlewares/authMiddleware.js';
 
 const router = express.Router();
 
@@ -30,7 +31,31 @@ router.post('/', upload.single('photo'), async (req, res) => {
         const { full_name, birth_date, gender, country, birth_place, email, password, id_user_type } = req.body;
         
         const photo_url = req.file ? `http://localhost:3000/uploads/profile_photos/${req.file.filename}` : null;
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+if(!emailRegex.test(email)){
+
+    return res.status(400).json({
+        error:'Correo inválido'
+    });
+
+}
+
+if(password.length < 8){
+
+    return res.status(400).json({
+        error:'La contraseña debe tener mínimo 8 caracteres'
+    });
+
+}
+
+if(full_name.trim().length < 3){
+
+    return res.status(400).json({
+        error:'Nombre demasiado corto'
+    });
+
+}
         const newUser = await User.create({
             full_name, birth_date, photo_url, gender, country, birth_place, email, password, id_user_type
         });
@@ -76,11 +101,17 @@ router.post('/login', async (req, res) => {
     }
 });
 
-router.patch('/:id', upload.single('photo'), async(req, res) => {
+router.patch('/:id',verificarToken, upload.single('photo'), async(req, res) => {
     try {
         const user = await User.findByPk(req.params.id);
         if (!user) return res.status(404).send('Usuario no encontrado');
+if(req.user.id != req.params.id){
 
+    return res.status(403).json({
+        error:'No autorizado'
+    });
+
+}
         const updateData = { ...req.body };
         if (req.file) {
             updateData.photo_url = `http://localhost:3000/uploads/profile_photos/${req.file.filename}`;
